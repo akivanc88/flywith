@@ -1,0 +1,35 @@
+# Old folder (renamed from LayoverAI → FlyWith)
+LayoverAI/
+
+# Xcode
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+!default.pbxuser
+!default.xcworkspace
+!default.xcuserstate
+xcuserdata/
+
+# Build output
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Environment / secrets (never commit API keys)
+.env
+*.env.local
