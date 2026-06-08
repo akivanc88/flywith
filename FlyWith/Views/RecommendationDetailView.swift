@@ -198,7 +198,7 @@ struct BookButton: View {
     let color: Color
 
     var body: some View {
-        Link(destination: URL(string: url) ?? URL(string: "https://kiwi.com")!) {
+        Link(destination: URL(string: url) ?? URL(string: "https://letsfg.co")!) {
             VStack(spacing: 3) {
                 Text(title).font(.subheadline).fontWeight(.bold)
                 Text(subtitle).font(.caption).opacity(0.85)

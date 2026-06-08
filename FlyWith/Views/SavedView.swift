@@ -146,7 +146,7 @@ struct SettingsView: View {
                     Link("Report a bug", destination: URL(string: "https://github.com/akivanc88/flywith/issues")!)
                 }
                 Section("Data") {
-                    Text("Flight prices are fetched from Kiwi.com when KIWI_API_KEY is configured. Without a key, the app uses local demo data. FlyWith is not affiliated with any airline or booking platform.")
+                    Text("Flight prices are fetched from LetsFG (LETSFG_API_KEY) or Kiwi.com (KIWI_API_KEY) when configured. Without a key, the app uses local demo data. FlyWith is not affiliated with any airline or booking platform.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
