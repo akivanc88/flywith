@@ -12,10 +12,7 @@ struct SearchView: View {
                 VStack(spacing: 0) {
 
                     // Header
-                    LinearGradient(
-                        colors: [.indigo, Color(red: 0.3, green: 0.1, blue: 0.6)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    )
+                    FWColor.heroGradient
                     .frame(height: 180)
                     .overlay {
                         VStack(alignment: .leading, spacing: 6) {
@@ -32,7 +29,7 @@ struct SearchView: View {
 
                     // Search form
                     VStack(spacing: 16) {
-                        GroupBox {
+                        FWPanel {
                             VStack(spacing: 12) {
                                 RoutePickerRow(label: "From", icon: "airplane.departure", value: $search.origin, placeholder: "e.g. Toronto (YYZ)")
                                 Divider()
@@ -40,11 +37,11 @@ struct SearchView: View {
                             }
                         }
 
-                        GroupBox {
+                        FWPanel {
                             DatePicker("Departure", selection: $search.departureDate, in: Date()..., displayedComponents: .date)
                         }
 
-                        GroupBox {
+                        FWPanel {
                             VStack(spacing: 12) {
                                 Stepper("Adults: \(search.adultCount)", value: $search.adultCount, in: 1...6)
                                 Stepper("Children: \(search.childCount)", value: $search.childCount, in: 0...5)
@@ -52,7 +49,7 @@ struct SearchView: View {
                             }
                         }
 
-                        GroupBox {
+                        FWPanel {
                             VStack(spacing: 10) {
                                 HStack {
                                     Text("Stopover duration")
@@ -71,7 +68,7 @@ struct SearchView: View {
                         Button { showCriteria = true } label: {
                             HStack {
                                 Image(systemName: search.criteria.icon)
-                                    .font(.title3).foregroundStyle(.indigo)
+                                    .font(.title3).foregroundStyle(FWColor.brandPrimary)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Travel profile").font(.caption).foregroundStyle(.secondary)
                                     Text(search.criteria.displayName).font(.subheadline).fontWeight(.semibold)
@@ -81,7 +78,7 @@ struct SearchView: View {
                             }
                             .padding()
                             .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
                         }
                         .buttonStyle(.plain)
 
@@ -97,19 +94,19 @@ struct SearchView: View {
                                 } else {
                                     Image(systemName: "sparkles")
                                 }
-                                Text(service.isLoading ? "Searching..." : "Find Smart Stopovers")
+                                Text(service.isLoading ? "Scanning routes..." : "Find smart stopovers")
                                     .fontWeight(.bold)
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(.indigo)
+                            .background(FWColor.brandPrimary)
                             .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .clipShape(RoundedRectangle(cornerRadius: FWRadius.xl))
                         }
                         .disabled(search.origin.isEmpty || search.destination.isEmpty || service.isLoading)
 
                         if let err = service.errorMessage {
-                            Text(err).font(.caption).foregroundStyle(.red)
+                            Text(err).font(.caption).foregroundStyle(FWColor.error)
                         }
                     }
                     .padding(16)
@@ -131,7 +128,7 @@ struct RoutePickerRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: icon).foregroundStyle(.indigo).frame(width: 28)
+            Image(systemName: icon).foregroundStyle(FWColor.brandPrimary).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label).font(.caption).foregroundStyle(.secondary)
                 TextField(placeholder, text: $value)

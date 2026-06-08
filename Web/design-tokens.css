@@ -1,0 +1,65 @@
+:root {
+  --color-brand-primary: #0c6b6e;
+  --color-brand-primary-hover: #0e5557;
+  --color-brand-accent: #ff6b4a;
+  --color-brand-accent-hover: #ed5535;
+  --color-brand-highlight: #f5ad2a;
+  --color-brand-ink: #062a2c;
+
+  --text-strong: #0f1716;
+  --text-body: #333c3b;
+  --text-muted: #64716f;
+  --text-subtle: #94a09e;
+
+  --surface-page: #ffffff;
+  --surface-sunken: #f8faf9;
+  --surface-card: #ffffff;
+  --surface-brand-soft: #ecfbfa;
+  --surface-accent-soft: #fff2ee;
+  --surface-gold-soft: #fef7e7;
+
+  --border-subtle: #e3e8e7;
+  --border-default: #cbd3d2;
+
+  --color-success: #047857;
+  --color-warning: #874810;
+  --color-error: #dc2626;
+  --color-info: #2563eb;
+  --color-booking: #059669;
+
+  --score-family: #db4d77;
+  --score-seniors: #4f86a6;
+  --score-budget: #10b981;
+  --score-explorer: #f97316;
+  --score-visa: #ef9612;
+
+  --gradient-hero: linear-gradient(158deg, #0d5e60 0%, #0b4446 52%, #062a2c 100%);
+  --gradient-card: linear-gradient(180deg, #ffffff 0%, #f4f7f6 100%);
+  --gradient-map: linear-gradient(160deg, #0c5b5e 0%, #0a3f41 60%, #082f31 100%);
+  --gradient-photo-scrim: linear-gradient(to top, rgba(8,18,18,0.88) 0%, rgba(6,42,44,0.30) 48%, rgba(6,42,44,0) 100%);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(15, 23, 22, 0.06);
+  --shadow-md: 0 3px 8px rgba(15, 23, 22, 0.07);
+  --shadow-lg: 0 8px 18px rgba(15, 23, 22, 0.10);
+  --shadow-brand: 0 8px 16px rgba(12, 107, 110, 0.30);
+}

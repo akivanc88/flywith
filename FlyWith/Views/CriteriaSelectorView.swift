@@ -27,8 +27,8 @@ struct CriteriaSelectorView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding()
-                    .background(Color(.systemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background(FWColor.surfaceSunken)
+                    .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
                     .padding(.horizontal)
                 }
                 .padding(.vertical)
@@ -55,8 +55,8 @@ struct CriteriaCard: View {
                 Text(criteria.emoji)
                     .font(.system(size: 36))
                     .frame(width: 56, height: 56)
-                    .background(isSelected ? Color.indigo.opacity(0.15) : Color(.systemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .background(isSelected ? FWColor.surfaceAccentSoft : FWColor.surfaceSunken)
+                    .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(criteria.displayName).font(.headline).foregroundStyle(.primary)
@@ -64,14 +64,14 @@ struct CriteriaCard: View {
                 }
                 Spacer()
                 if isSelected {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.indigo).font(.title3)
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(FWColor.brandAccent).font(.title3)
                 }
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(isSelected ? Color.indigo.opacity(0.05) : Color(.systemBackground))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(isSelected ? Color.indigo : Color(.separator), lineWidth: isSelected ? 2 : 0.5))
+                    .fill(isSelected ? FWColor.surfaceAccentSoft : FWColor.surfaceCard)
+                    .overlay(RoundedRectangle(cornerRadius: FWRadius.xl).stroke(isSelected ? FWColor.brandAccent : FWColor.borderDefault, lineWidth: isSelected ? 2 : 0.5))
             )
         }
         .buttonStyle(.plain)

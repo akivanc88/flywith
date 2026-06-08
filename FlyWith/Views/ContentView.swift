@@ -16,7 +16,7 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gear")
                 }
         }
-        .accentColor(.indigo)
+        .accentColor(FWColor.brandPrimary)
     }
 }
 

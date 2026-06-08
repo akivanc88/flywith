@@ -6,18 +6,25 @@
   <title>FlyWith — Turn Connections Into Adventures</title>
   <style>
     :root {
-      --ink: #0f172a;
-      --muted: #64748b;
-      --accent: #6366f1;
-      --accent-light: #eef2ff;
-      --accent-dark: #4338ca;
-      --green: #059669;
+      --ink: #0f1716;
+      --brand-ink: #062a2c;
+      --muted: #64716f;
+      --accent: #0c6b6e;
+      --accent-light: #ecfbfa;
+      --accent-dark: #0e5557;
+      --coral: #ff6b4a;
+      --coral-light: #fff2ee;
+      --gold: #f5ad2a;
+      --gold-light: #fef7e7;
+      --green: #047857;
       --green-light: #ecfdf5;
-      --amber: #d97706;
+      --amber: #874810;
       --amber-light: #fffbeb;
-      --surface: #f8fafc;
-      --border: #e2e8f0;
+      --surface: #f8faf9;
+      --border: #e3e8e7;
       --white: #ffffff;
+      --gradient-hero: linear-gradient(158deg, #0d5e60 0%, #0b4446 52%, #062a2c 100%);
+      --gradient-soft: linear-gradient(180deg, #ecfbfa 0%, #ffffff 100%);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,7 +47,7 @@
       border-bottom: 1px solid var(--border);
     }
     .nav-logo { font-size: 1.2rem; font-weight: 700; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    .nav-logo span { font-size: 1.5rem; }
+    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
     .nav-links { display: flex; gap: 2rem; }
     .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.9rem; transition: color .2s; }
     .nav-links a:hover { color: var(--ink); }
@@ -51,11 +58,11 @@
     .hero {
       padding: 80px 5vw 60px;
       text-align: center;
-      background: linear-gradient(180deg, #f0f0ff 0%, #ffffff 100%);
+      background: var(--gradient-soft);
     }
     .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-light); color: var(--accent); font-size: 0.8rem; font-weight: 600; padding: 4px 14px; border-radius: 100px; margin-bottom: 24px; }
     .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.15; max-width: 800px; margin: 0 auto 20px; letter-spacing: -0.02em; }
-    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero h1 em { font-style: normal; color: var(--coral); }
     .hero p { font-size: 1.15rem; color: var(--muted); max-width: 560px; margin: 0 auto 40px; }
     .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
     .btn-primary { background: var(--accent); color: white; padding: 14px 28px; border-radius: 12px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: background .2s, transform .1s; display: flex; align-items: center; gap: 8px; }
@@ -70,12 +77,12 @@
 
     /* PROBLEM BANNER */
     .problem-banner {
-      background: var(--ink); color: white;
+      background: var(--brand-ink); color: white;
       padding: 20px 5vw;
       text-align: center;
       font-size: 0.95rem;
     }
-    .problem-banner strong { color: #a5b4fc; }
+    .problem-banner strong { color: #9ee6e2; }
 
     /* DEMO SECTION */
     .section { padding: 80px 5vw; }
@@ -93,12 +100,12 @@
       overflow: hidden;
     }
     .demo-header {
-      background: var(--ink); color: white;
+      background: var(--brand-ink); color: white;
       padding: 20px 28px;
       display: flex; align-items: center; gap: 16px;
     }
     .demo-header .route { font-size: 1.1rem; font-weight: 700; }
-    .demo-header .meta { font-size: 0.85rem; color: #94a3b8; margin-left: auto; }
+    .demo-header .meta { font-size: 0.85rem; color: #94a09e; margin-left: auto; }
 
     .demo-body { padding: 28px; }
     .demo-tabs { display: flex; gap: 8px; margin-bottom: 28px; }
@@ -121,7 +128,7 @@
     .flight-card.winner::before {
       content: "✨ FlyWith Pick";
       position: absolute; top: -12px; left: 20px;
-      background: var(--accent); color: white;
+      background: var(--coral); color: white;
       font-size: 0.75rem; font-weight: 700;
       padding: 4px 12px; border-radius: 100px;
     }
@@ -145,7 +152,7 @@
     .fc-line::after { content: "✈"; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; }
     .fc-dur { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
     .fc-layover-pill {
-      background: var(--accent-light); color: var(--accent);
+      background: var(--gold-light); color: #a85c0c;
       border-radius: 100px; padding: 4px 12px;
       font-size: 0.75rem; font-weight: 700;
       white-space: nowrap;
@@ -211,13 +218,13 @@
 
     /* APP STORE CTA */
     .app-section {
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+      background: var(--gradient-hero);
       color: white;
       padding: 80px 5vw;
       text-align: center;
     }
     .app-section h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 16px; }
-    .app-section p { color: #a5b4fc; margin-bottom: 40px; font-size: 1rem; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .app-section p { color: #cdf2ef; margin-bottom: 40px; font-size: 1rem; max-width: 480px; margin-left: auto; margin-right: auto; }
     .app-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
     .app-btn {
       background: rgba(255,255,255,0.1);
@@ -239,7 +246,7 @@
     .github-section { padding: 60px 5vw; text-align: center; border-top: 1px solid var(--border); }
     .github-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 12px; }
     .github-section p { color: var(--muted); margin-bottom: 28px; }
-    .github-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--ink); color: white; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1rem; }
+    .github-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--brand-ink); color: white; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1rem; }
     .github-btn:hover { opacity: 0.9; }
 
     /* FOOTER */
@@ -254,33 +261,33 @@
     }
   </style>
 </head>
-<body>
+<body id="top">
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#"><span>✈️</span> FlyWith</a>
+  <a class="nav-logo" href="#top"><img src="assets/flywith-mark.svg" alt="" /> FlyWith</a>
   <div class="nav-links">
     <a href="#how">How it works</a>
     <a href="#demo">Demo</a>
     <a href="#pricing">Pricing</a>
     <a href="https://github.com/akivanc88/flywith">GitHub</a>
   </div>
-  <a class="nav-cta" href="#app">Get the app</a>
+  <a class="nav-cta" href="#app">Run the app</a>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-badge">🧳 Open source travel intelligence</div>
   <h1>Your layover is a <em>vacation in disguise</em></h1>
-  <p>Stop suffering through rushed connections. FlyWith finds you better routes — with 3–5 day stopovers — that are often cheaper than the "direct" option.</p>
+  <p>Stop suffering through rushed connections. FlyWith finds better routes — with 3–7 day stopovers — that can cost the same or less than rushing through.</p>
   <div class="hero-buttons">
-    <a class="btn-primary" href="#demo">🔍 See live demo</a>
+    <a class="btn-primary" href="#demo">🔍 See fare demo</a>
     <a class="btn-secondary" href="https://github.com/akivanc88/flywith">⭐ Star on GitHub</a>
   </div>
   <div class="hero-proof">
-    <div class="proof-stat"><div class="num">$300+</div><div class="label">avg savings vs. "comfortable" routes</div></div>
+    <div class="proof-stat"><div class="num">CAD $300+</div><div class="label">possible savings vs. comfortable routes</div></div>
     <div class="proof-stat"><div class="num">5 days</div><div class="label">bonus destination included</div></div>
-    <div class="proof-stat"><div class="num">3 criteria</div><div class="label">kids · seniors · budget travelers</div></div>
+    <div class="proof-stat"><div class="num">4 profiles</div><div class="label">kids · seniors · budget · explorer</div></div>
   </div>
 </section>
 
@@ -308,7 +315,7 @@
     <div class="how-step">
       <div class="how-num">3</div>
       <h3>You pick a mini-vacation</h3>
-      <p>See real fares, total cost comparison, and curated things to do — then book through us or jump to Google Flights / Skyscanner if we can't beat their price.</p>
+      <p>Compare fare snapshots, total cost, and curated things to do — then book through Kiwi or jump to Google Flights / Skyscanner if that is the better option.</p>
     </div>
     <div class="how-step">
       <div class="how-num">4</div>
@@ -320,9 +327,9 @@
 
 <!-- INTERACTIVE DEMO -->
 <section class="section" id="demo" style="background: var(--surface); padding-top: 60px; padding-bottom: 60px;">
-  <div class="section-label">Live demo</div>
+  <div class="section-label">Fare demo</div>
   <div class="section-title">Toronto → Mumbai, Sept 15</div>
-  <div class="section-sub">Real fares from Kiwi.com — pulled live. Switch tabs to see how a smart layover changes everything.</div>
+  <div class="section-sub">Sample Kiwi fares captured in June 2026. Switch tabs to see how a smart layover changes everything.</div>
 
   <div class="demo-container">
     <div class="demo-header">
@@ -365,7 +372,7 @@
                 <div class="fc-price">CAD $849</div>
                 <div class="fc-savings extra">Cheapest, but is it worth it?</div>
               </div>
-              <a class="fc-book" href="https://on.kiwi.com/pig1Dl" target="_blank">Book on Kiwi ↗</a>
+              <a class="fc-book" href="https://on.kiwi.com/pig1Dl" target="_blank" rel="noopener">Book on Kiwi ↗</a>
             </div>
           </div>
 
@@ -389,7 +396,7 @@
                 <div class="fc-price">CAD $1,072</div>
                 <div class="fc-savings extra">More comfortable, still just a layover</div>
               </div>
-              <a class="fc-book" href="https://on.kiwi.com/B5e840" target="_blank">Book on Kiwi ↗</a>
+              <a class="fc-book" href="https://on.kiwi.com/B5e840" target="_blank" rel="noopener">Book on Kiwi ↗</a>
             </div>
           </div>
 
@@ -444,8 +451,8 @@
                 <div class="fc-savings">🏖️ 5 bonus days in Dubai for just $258 more than cheapest</div>
               </div>
               <div style="display:flex; gap:8px; flex-direction:column; align-items:flex-end;">
-                <a class="fc-book" href="https://on.kiwi.com/haDND2" target="_blank" style="text-align:center;">Leg 1 ↗</a>
-                <a class="fc-book" href="https://on.kiwi.com/i7UN1y" target="_blank" style="text-align:center; background: var(--green);">Leg 2 ↗</a>
+                <a class="fc-book" href="https://on.kiwi.com/haDND2" target="_blank" rel="noopener" style="text-align:center;">Leg 1 ↗</a>
+                <a class="fc-book" href="https://on.kiwi.com/i7UN1y" target="_blank" rel="noopener" style="text-align:center; background: var(--green);">Leg 2 ↗</a>
               </div>
             </div>
           </div>
@@ -487,7 +494,7 @@
                 <div style="font-size:0.8rem; color:var(--muted);">Leg 1 + Leg 2 combined</div>
                 <div class="fc-savings">🌍 4 days in Istanbul for just $17 more than a rushed connection</div>
               </div>
-              <a class="fc-book" href="https://on.kiwi.com/xLTROB" target="_blank">Book on Kiwi ↗</a>
+              <a class="fc-book" href="https://on.kiwi.com/xLTROB" target="_blank" rel="noopener">Book on Kiwi ↗</a>
             </div>
           </div>
 
@@ -537,7 +544,7 @@
 <section class="section" id="pricing" style="background:var(--surface);">
   <div class="section-label">Price comparison</div>
   <div class="section-title">Toronto → Mumbai, realistic fares</div>
-  <div class="section-sub">Live data from Kiwi.com — updated June 2026</div>
+  <div class="section-sub">Kiwi fare snapshot captured in June 2026 for a September 2026 trip.</div>
 
   <div class="pricing-table">
     <div class="pricing-row header">
@@ -591,15 +598,15 @@
 
 <!-- APP STORE CTA -->
 <section class="app-section" id="app">
-  <div class="hero-badge" style="background:rgba(255,255,255,0.1); color:white;">📱 Available on iOS</div>
+  <div class="hero-badge" style="background:rgba(255,255,255,0.1); color:white;">📱 iOS prototype</div>
   <h2>Take FlyWith on your next trip</h2>
-  <p>Search smarter, travel better. The free iOS app puts personalized layover recommendations in your pocket.</p>
+  <p>Search smarter, travel better. The open-source iOS app is ready to run from Xcode with mock data or a Kiwi API key.</p>
   <div class="app-buttons">
-    <a class="app-btn" href="#">
-      <div class="store-icon">🍎</div>
+    <a class="app-btn" href="https://github.com/akivanc88/flywith">
+      <div class="store-icon">⌘</div>
       <div class="store-text">
-        <small>Download on the</small>
-        App Store
+        <small>Open in</small>
+        Xcode
       </div>
     </a>
     <a class="app-btn" href="https://github.com/akivanc88/flywith">
@@ -615,7 +622,7 @@
 <!-- GITHUB -->
 <section class="github-section">
   <h2>Open source & built in public</h2>
-  <p>FlyWith is fully open source. Built with Swift (iOS), plain HTML/JS (web), and the Kiwi flight API. PRs welcome.</p>
+  <p>FlyWith is fully open source. Built with SwiftUI, plain HTML/JS, and Kiwi.com Tequila API support. PRs welcome.</p>
   <a class="github-btn" href="https://github.com/akivanc88/flywith">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
     View on GitHub
@@ -623,7 +630,7 @@
 </section>
 
 <footer>
-  FlyWith is an open-source project. Flight prices from Kiwi.com — live as of June 2026. Not affiliated with any airline.
+  FlyWith is an open-source project. Demo flight prices are Kiwi fare snapshots from June 2026. Not affiliated with any airline.
   Built with ❤️ for travelers who hate wasted layovers.
 </footer>
 

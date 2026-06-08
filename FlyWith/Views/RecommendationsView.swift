@@ -61,7 +61,7 @@ struct LoadingView: View {
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "airplane.circle.fill")
-                .font(.system(size: 60)).foregroundStyle(.indigo)
+                .font(.system(size: 60)).foregroundStyle(FWColor.brandPrimary)
                 .rotationEffect(.degrees(Double(dotCount) * 15))
                 .animation(.easeInOut(duration: 0.4), value: dotCount)
             Text("Scanning routes\(String(repeating: ".", count: dotCount % 4))")
@@ -93,14 +93,14 @@ struct RecommendationCard: View {
                         Text(recommendation.badge.rawValue)
                             .font(.caption2).fontWeight(.bold)
                             .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(Color.indigo.opacity(0.12))
-                            .foregroundStyle(.indigo)
+                            .background(FWColor.surfaceAccentSoft)
+                            .foregroundStyle(FWColor.brandAccent)
                             .clipShape(Capsule())
                     }
                     HStack(spacing: 4) {
                         ForEach(0..<5) { i in
                             Image(systemName: i < Int(score.rounded()) ? "star.fill" : "star")
-                                .font(.system(size: 10)).foregroundStyle(.orange)
+                                .font(.system(size: 10)).foregroundStyle(FWColor.brandHighlight)
                         }
                         Text(String(format: "%.1f", score)).font(.caption).foregroundStyle(.secondary)
                     }
@@ -119,7 +119,7 @@ struct RecommendationCard: View {
                 LegSummary(leg: recommendation.leg1, label: "Leg 1")
                 Divider()
                 VStack(spacing: 4) {
-                    Text("\(recommendation.stopoverDays)d").font(.caption2).fontWeight(.bold).foregroundStyle(.indigo)
+                    Text("\(recommendation.stopoverDays) days").font(.caption2).fontWeight(.bold).foregroundStyle(FWColor.brandPrimary)
                     Text(city.cityName).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(width: 60)
@@ -133,7 +133,7 @@ struct RecommendationCard: View {
             HStack {
                 if recommendation.hasSavings {
                     Label("Save CAD \(Int(recommendation.savings)) vs direct", systemImage: "tag.fill")
-                        .font(.caption).fontWeight(.semibold).foregroundStyle(.green)
+                        .font(.caption).fontWeight(.semibold).foregroundStyle(FWColor.success)
                 } else {
                     Label("Just CAD \(Int(-recommendation.savings)) more — with a \(recommendation.stopoverDays)-day bonus trip", systemImage: "sparkles")
                         .font(.caption).foregroundStyle(.secondary)
@@ -142,11 +142,11 @@ struct RecommendationCard: View {
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
             }
             .padding(.horizontal, 16).padding(.vertical, 12)
-            .background(Color(.systemGroupedBackground))
+            .background(FWColor.surfaceSunken)
         }
         .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: .black.opacity(0.07), radius: 8, y: 3)
+        .clipShape(RoundedRectangle(cornerRadius: FWRadius.xl2))
+        .fwShadow(.md)
     }
 }
 
@@ -163,7 +163,7 @@ struct LegSummary: View {
                 Text(leg.destination).font(.caption).fontWeight(.bold)
             }
             Text(leg.durationFormatted).font(.caption2).foregroundStyle(.secondary)
-            Text("CAD \(Int(leg.price))").font(.caption2).fontWeight(.semibold).foregroundStyle(.indigo)
+            Text("CAD \(Int(leg.price))").font(.caption2).fontWeight(.semibold).foregroundStyle(FWColor.brandPrimary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -174,7 +174,7 @@ struct LegSummary: View {
 struct DirectFlightBanner: View {
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "info.circle.fill").foregroundStyle(.orange)
+            Image(systemName: "info.circle.fill").foregroundStyle(FWColor.brandHighlight)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Direct comparison: ~CAD $1,072")
                     .font(.subheadline).fontWeight(.semibold)
@@ -183,9 +183,9 @@ struct DirectFlightBanner: View {
             }
         }
         .padding(14)
-        .background(Color.orange.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.orange.opacity(0.2)))
+        .background(FWColor.surfaceGoldSoft)
+        .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: FWRadius.lg).stroke(FWColor.brandHighlight.opacity(0.35)))
     }
 }
 
@@ -202,7 +202,7 @@ struct EmptyStateView: View {
                 .font(.subheadline).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center).padding(.horizontal)
             Link("Open Skyscanner ↗", destination: URL(string: "https://www.skyscanner.com")!)
-                .buttonStyle(.borderedProminent).tint(.indigo)
+                .buttonStyle(.borderedProminent).tint(FWColor.brandPrimary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

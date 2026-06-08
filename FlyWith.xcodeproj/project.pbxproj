@@ -18,6 +18,7 @@
 		2C2C2C2C2C2C2C2C2C2C2C2C /* RecommendationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0A0A0A0A0A0A0A0A0A0A0A /* RecommendationDetailView.swift */; };
 		2D2D2D2D2D2D2D2D2D2D2D2D /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0B0B0B0B0B0B0B0B0B0B0B /* SavedView.swift */; };
 		2E2E2E2E2E2E2E2E2E2E2E2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C0C0C0C0C0C0C0C0C0C0C0C /* Assets.xcassets */; };
+		2F2F2F2F2F2F2F2F2F2F2F2F /* FlyWithTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		0A0A0A0A0A0A0A0A0A0A0A0A /* RecommendationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationDetailView.swift; sourceTree = "<group>"; };
 		0B0B0B0B0B0B0B0B0B0B0B0B /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
 		0C0C0C0C0C0C0C0C0C0C0C0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyWithTokens.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 				F4F4F4F4F4F4F4F4F4F4F4F4 /* Models */,
 				F5F5F5F5F5F5F5F5F5F5F5F5 /* Views */,
 				F6F6F6F6F6F6F6F6F6F6F6F6 /* Services */,
+				F8F8F8F8F8F8F8F8F8F8F8F8 /* DesignSystem */,
 				0C0C0C0C0C0C0C0C0C0C0C0C /* Assets.xcassets */,
 			);
 			path = FlyWith;
@@ -110,6 +113,14 @@
 				050505050505050505050505 /* MockData.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		F8F8F8F8F8F8F8F8F8F8F8F8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -191,6 +202,7 @@
 				2B2B2B2B2B2B2B2B2B2B2B2B /* RecommendationsView.swift in Sources */,
 				2C2C2C2C2C2C2C2C2C2C2C2C /* RecommendationDetailView.swift in Sources */,
 				2D2D2D2D2D2D2D2D2D2D2D2D /* SavedView.swift in Sources */,
+				2F2F2F2F2F2F2F2F2F2F2F2F /* FlyWithTokens.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

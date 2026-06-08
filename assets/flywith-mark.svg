@@ -1,0 +1,12 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FlyWith mark">
+  <defs>
+    <linearGradient id="fwMarkBg" x1="8" y1="8" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0c6b6e"></stop>
+      <stop offset="1" stop-color="#062a2c"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#fwMarkBg)"></rect>
+  <path d="M24 66 C 36 40, 60 30, 74 28" stroke="#ff6b4a" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0.5 8"></path>
+  <circle cx="24" cy="66" r="4.5" fill="#ff6b4a"></circle>
+  <path d="M70.5 26.5 L52 42 L57.5 48.5 L60.5 44.5 L63 56 L70.5 26.5 Z M52 42 L44 45 L48 48 L52 42 Z" fill="#ffffff"></path>
+</svg>
