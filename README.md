@@ -1,8 +1,10 @@
 # ✈️ FlyWith
 
-> **Turn your next long-haul connection into a mini-vacation — often for the same price or less.**
+> **Decide whether a long-haul stopover is actually worth it for your family.**
 
-FlyWith is an open-source iOS app + web landing page that finds smarter flight routes with extended stopovers (3–7 days), personalized to your travel profile — family with kids, traveling with seniors, budget-focused, or adventure seeker.
+FlyWith is an open-source iOS app + promotional website for diaspora families planning long-haul travel. It finds smarter flight routes with extended stopovers (3–7 days), then explains the tradeoff in plain language: fare, hotel estimate, visa friction, airport comfort, family logistics, senior accessibility, and booking confidence.
+
+FlyWith is **not** trying to replace Google Flights, Skyscanner, or Kiwi. It is a decision layer on top of flight search: "Is this stopover worth it for my family?"
 
 ## The problem
 
@@ -25,11 +27,12 @@ Prices fetched June 2026 via Kiwi.com:
 ## Features
 
 - 🔍 **Smart stopover search** — finds optimal stopover cities based on your profile
-- 👨‍👩‍👧‍👦 **Family mode** — airports with play areas, stroller access, kid-friendly cities
-- 👴 **Senior mode** — short terminal walks, wheelchair access, restful destinations
+- ✅ **Worth-it score** — ranks routes by family value, not cheapest fare alone
+- 👨‍👩‍👧‍👦 **Diaspora family mode** — lower fatigue, stroller logistics, kid-friendly airports, easy first nights
+- 👴 **Parents & seniors mode** — assisted travel, short walks, wheelchair access, calmer stopovers
 - 💸 **Budget mode** — free-visa cities, cheap hotels, maximum savings
 - 🧭 **Explorer mode** — off-the-beaten-path stopovers you'd never book deliberately
-- 📊 **Price transparency** — total cost of both legs vs. direct alternatives, always shown
+- 📊 **Trip transparency** — flight cost, hotel estimate, visa caveats, airport comfort, and family logistics
 - 🔗 **Fallback links** — when we can't beat Google Flights, we link out to Skyscanner/Kiwi
 
 ## Tech stack
@@ -87,11 +90,22 @@ flywith/
 
 - [ ] Airport autocomplete (Kiwi `/locations` endpoint)
 - [x] Mock data mode for simulator without API key
+- [x] Worth-it scoring for family stopover recommendations
+- [x] Research-backed product direction for diaspora family travel
 - [ ] Hotel cost estimation for stopover city
 - [ ] Visa requirement database
 - [ ] Apple Maps integration for city highlights
 - [ ] Push notifications for price drops
 - [ ] Android version
+
+## Product research
+
+The repo includes the real-application transition plan:
+
+- [`docs/market-research.md`](docs/market-research.md) — competitor map, Reddit/customer signals, supply feasibility, and validation plan.
+- [`docs/real-app-roadmap.md`](docs/real-app-roadmap.md) — MVP boundary, data model direction, API research, and launch readiness gates.
+
+The current app still runs with mock data when no `KIWI_API_KEY` is configured. The goal is to replace mock fare and city facts cautiously, source by source, without pretending editorial estimates are verified live data.
 
 ## Contributing
 

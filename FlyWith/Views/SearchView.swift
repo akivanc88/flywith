@@ -18,9 +18,9 @@ struct SearchView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("✈️ FlyWith")
                                 .font(.caption).fontWeight(.semibold).foregroundStyle(.white.opacity(0.7))
-                            Text("Turn connections into adventures")
+                            Text("Is this stopover worth it?")
                                 .font(.title2).fontWeight(.bold).foregroundStyle(.white)
-                            Text("Find routes with smart stopovers — often cheaper than rushing through.")
+                            Text("Compare long-haul routes by family comfort, visas, hotel cost, and fare.")
                                 .font(.caption).foregroundStyle(.white.opacity(0.8))
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,7 +94,7 @@ struct SearchView: View {
                                 } else {
                                     Image(systemName: "sparkles")
                                 }
-                                Text(service.isLoading ? "Scanning routes..." : "Find smart stopovers")
+                                Text(service.isLoading ? "Scoring stopovers..." : "Find family stopovers")
                                     .fontWeight(.bold)
                             }
                             .frame(maxWidth: .infinity)

@@ -8,7 +8,7 @@ struct CriteriaSelectorView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    Text("Who's traveling with you?")
+                    Text("Pick the constraint that should shape the recommendation.")
                         .font(.subheadline).foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
@@ -23,7 +23,7 @@ struct CriteriaSelectorView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("How FlyWith scores stopovers")
                             .font(.subheadline).fontWeight(.semibold)
-                        Text("FlyWith scores each potential stopover city across 20+ attributes: airport accessibility, visa requirements, child-friendly attractions, walking distances, senior care facilities, hotel prices, and more. Your profile determines which attributes are weighted highest.")
+                        Text("FlyWith is not trying to replace Google Flights. It adds the family decision layer: fatigue, visa friction, airport comfort, hotel cost, stroller or wheelchair practicality, and plain-language booking confidence.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding()
