@@ -33,3 +33,7 @@ Thumbs.db
 # Environment / secrets (never commit API keys)
 .env
 *.env.local
+
+# Local planning and research notes
+docs/*.md
+swiftly-x86_64.tar.gz

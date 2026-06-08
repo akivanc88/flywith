@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FlyWith — Turn Connections Into Adventures</title>
+  <title>FlyWith — Family Stopover Advisor</title>
   <style>
     :root {
       --ink: #0f1716;
@@ -203,6 +203,29 @@
     .how-step h3 { font-weight: 700; margin-bottom: 8px; }
     .how-step p { font-size: 0.9rem; color: var(--muted); }
 
+    /* RESEARCH */
+    .research-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .research-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .research-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .research-card p { color: var(--muted); font-size: 0.9rem; }
+    .quote-strip {
+      margin-top: 28px;
+      background: var(--brand-ink);
+      color: white;
+      border-radius: 16px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .quote-strip strong { color: #9ee6e2; }
+    .quote-strip p { color: #cdf2ef; font-size: 0.9rem; }
+
     /* PRICING TABLE */
     .pricing-table { max-width: 800px; margin: 0 auto; }
     .pricing-row { display: grid; grid-template-columns: 1fr 130px 130px 130px; gap: 0; border-bottom: 1px solid var(--border); }
@@ -269,7 +292,7 @@
   <div class="nav-links">
     <a href="#how">How it works</a>
     <a href="#demo">Demo</a>
-    <a href="#pricing">Pricing</a>
+    <a href="#research">Research</a>
     <a href="https://github.com/akivanc88/flywith">GitHub</a>
   </div>
   <a class="nav-cta" href="#app">Run the app</a>
@@ -277,59 +300,59 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">🧳 Open source travel intelligence</div>
-  <h1>Your layover is a <em>vacation in disguise</em></h1>
-  <p>Stop suffering through rushed connections. FlyWith finds better routes — with 3–7 day stopovers — that can cost the same or less than rushing through.</p>
+  <div class="hero-badge">🧳 iOS-first family stopover advisor</div>
+  <h1>Is this stopover <em>worth it</em> for your family?</h1>
+  <p>FlyWith helps diaspora families compare long-haul routes by fare, hotel cost, visa friction, airport comfort, child logistics, and travel fatigue.</p>
   <div class="hero-buttons">
-    <a class="btn-primary" href="#demo">🔍 See fare demo</a>
+    <a class="btn-primary" href="#demo">🔍 See worth-it demo</a>
     <a class="btn-secondary" href="https://github.com/akivanc88/flywith">⭐ Star on GitHub</a>
   </div>
   <div class="hero-proof">
-    <div class="proof-stat"><div class="num">CAD $300+</div><div class="label">possible savings vs. comfortable routes</div></div>
-    <div class="proof-stat"><div class="num">5 days</div><div class="label">bonus destination included</div></div>
-    <div class="proof-stat"><div class="num">4 profiles</div><div class="label">kids · seniors · budget · explorer</div></div>
+    <div class="proof-stat"><div class="num">3-7 days</div><div class="label">intentional recovery stopovers</div></div>
+    <div class="proof-stat"><div class="num">100%</div><div class="label">plain-language tradeoff score</div></div>
+    <div class="proof-stat"><div class="num">4 profiles</div><div class="label">families · parents · budget · explorer</div></div>
   </div>
 </section>
 
 <!-- PROBLEM -->
 <div class="problem-banner">
-  Google Flights shows you <strong>$849 Toronto → Mumbai</strong>. What it doesn't tell you: that's a 24-hour journey through Chicago and Paris with a 90-minute sprint between terminals. <strong>There's a smarter way.</strong>
+  Google Flights can show <strong>$849 Toronto → Mumbai</strong>. It will not tell you whether that route is humane with a stroller, tired kids, older parents, visa rules, and two terminal changes. <strong>FlyWith adds the family decision layer.</strong>
 </div>
 
 <!-- HOW IT WORKS -->
 <section class="section" id="how">
   <div class="section-label">How it works</div>
-  <div class="section-title">Smart routing in 3 steps</div>
-  <div class="section-sub">FlyWith scores layover cities based on your travel profile, not just connection time.</div>
+  <div class="section-title">Not another generic flight search</div>
+  <div class="section-sub">FlyWith scores stopover cities based on your family constraints, not just connection time.</div>
   <div class="how-grid">
     <div class="how-step">
       <div class="how-num">1</div>
-      <h3>Tell us your trip</h3>
-      <p>Origin, destination, dates, and who's traveling — solo, with kids, elderly parents, or on a tight budget.</p>
+      <h3>Tell us your long-haul trip</h3>
+      <p>Origin, destination, dates, passenger mix, and whether you are traveling with kids, parents, seniors, or a tight budget.</p>
     </div>
     <div class="how-step">
       <div class="how-num">2</div>
-      <h3>We score every layover city</h3>
-      <p>Our algorithm rates each potential stopover on ease, family-friendliness, senior accessibility, visa requirements, and entertainment value.</p>
+      <h3>We score stopover value</h3>
+      <p>Each option gets a worth-it score using fare, hotel estimate, visa friction, airport comfort, accessibility, and family logistics.</p>
     </div>
     <div class="how-step">
       <div class="how-num">3</div>
-      <h3>You pick a mini-vacation</h3>
-      <p>Compare fare snapshots, total cost, and curated things to do — then book through Kiwi or jump to Google Flights / Skyscanner if that is the better option.</p>
+      <h3>You compare the tradeoff</h3>
+      <p>See the standard route beside stopover options, including what still needs manual verification before booking.</p>
     </div>
     <div class="how-step">
       <div class="how-num">4</div>
-      <h3>Arrive refreshed</h3>
-      <p>No more zombie-walking through arrivals. You've already seen Dubai, Amsterdam, or Tokyo — and spent less than the "fast" route.</p>
+      <h3>Book somewhere else</h3>
+      <p>FlyWith does not sell tickets in v1. It explains the recommendation and hands off to Kiwi, Google Flights, Skyscanner, or an airline page.</p>
     </div>
   </div>
 </section>
 
 <!-- INTERACTIVE DEMO -->
 <section class="section" id="demo" style="background: var(--surface); padding-top: 60px; padding-bottom: 60px;">
-  <div class="section-label">Fare demo</div>
+  <div class="section-label">Worth-it demo</div>
   <div class="section-title">Toronto → Mumbai, Sept 15</div>
-  <div class="section-sub">Sample Kiwi fares captured in June 2026. Switch tabs to see how a smart layover changes everything.</div>
+  <div class="section-sub">Sample Kiwi fares captured in June 2026. Switch tabs to see why price alone is not enough for family travel.</div>
 
   <div class="demo-container">
     <div class="demo-header">
@@ -540,8 +563,49 @@
   </div>
 </section>
 
+<!-- RESEARCH -->
+<section class="section" id="research" style="background:var(--surface);">
+  <div class="section-label">Market gap</div>
+  <div class="section-title">Families still do the hard part manually</div>
+  <div class="section-sub">Competitors solve pieces of the journey. FlyWith focuses on the missing decision: whether a stopover is actually better for the people traveling.</div>
+
+  <div class="research-grid">
+    <div class="research-card">
+      <h3>Google Flights and Skyscanner</h3>
+      <p>Excellent inventory and flexible search, but users must already know how to model stopovers, multi-city fares, visas, and separate-ticket risk.</p>
+    </div>
+    <div class="research-card">
+      <h3>Airwander, Stovo, GetStopover</h3>
+      <p>They frame stopovers as bonus destinations, but rarely score family comfort, stroller logistics, senior accessibility, or first-night recovery.</p>
+    </div>
+    <div class="research-card">
+      <h3>Going and Hopper</h3>
+      <p>Strong at alerts and price confidence. They do not answer whether a cheaper route is survivable with kids or older parents.</p>
+    </div>
+    <div class="research-card">
+      <h3>Airline stopover programs</h3>
+      <p>Great perks when eligible, but rules vary by airline, route, fare, passport, and timing. Travelers need neutral comparison.</p>
+    </div>
+  </div>
+
+  <div class="quote-strip">
+    <div>
+      <strong>Stopover confusion</strong>
+      <p>Travelers often discover through Reddit that 24+ hours is a stopover, not a layover, and that multi-city search may be required.</p>
+    </div>
+    <div>
+      <strong>Family travel pain</strong>
+      <p>Parents ask about stroller handling, layover length, play areas, sleep, snacks, and whether the cheapest route is worth the stress.</p>
+    </div>
+    <div>
+      <strong>Parents and seniors</strong>
+      <p>Adult children worry about wheelchair assistance, terminal walks, medication carry-on, rest windows, and missed connections.</p>
+    </div>
+  </div>
+</section>
+
 <!-- PRICING COMPARISON TABLE -->
-<section class="section" id="pricing" style="background:var(--surface);">
+<section class="section" id="pricing">
   <div class="section-label">Price comparison</div>
   <div class="section-title">Toronto → Mumbai, realistic fares</div>
   <div class="section-sub">Kiwi fare snapshot captured in June 2026 for a September 2026 trip.</div>
@@ -598,21 +662,21 @@
 
 <!-- APP STORE CTA -->
 <section class="app-section" id="app">
-  <div class="hero-badge" style="background:rgba(255,255,255,0.1); color:white;">📱 iOS prototype</div>
-  <h2>Take FlyWith on your next trip</h2>
-  <p>Search smarter, travel better. The open-source iOS app is ready to run from Xcode with mock data or a Kiwi API key.</p>
+  <div class="hero-badge" style="background:rgba(255,255,255,0.1); color:white;">📱 iOS app in development</div>
+  <h2>Join the family stopover waitlist</h2>
+  <p>FlyWith is moving from mock demo to real app cautiously: live fares first, then verified visa rules, airport comfort, hotel estimates, and price watch.</p>
   <div class="app-buttons">
     <a class="app-btn" href="https://github.com/akivanc88/flywith">
       <div class="store-icon">⌘</div>
       <div class="store-text">
-        <small>Open in</small>
+        <small>Run prototype in</small>
         Xcode
       </div>
     </a>
     <a class="app-btn" href="https://github.com/akivanc88/flywith">
       <div class="store-icon">⭐</div>
       <div class="store-text">
-        <small>Contribute on</small>
+        <small>Follow the real app on</small>
         GitHub
       </div>
     </a>

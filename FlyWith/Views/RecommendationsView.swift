@@ -29,7 +29,7 @@ struct RecommendationsView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Text("\(service.recommendations.count) options")
+                    Text("\(service.recommendations.count) scored")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 .padding()
@@ -66,7 +66,7 @@ struct LoadingView: View {
                 .animation(.easeInOut(duration: 0.4), value: dotCount)
             Text("Scanning routes\(String(repeating: ".", count: dotCount % 4))")
                 .font(.headline)
-            Text("Checking fares for 5 stopover cities\nvia Kiwi.com")
+            Text("Checking fares, comfort, visas, hotels,\nand family logistics")
                 .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -98,20 +98,29 @@ struct RecommendationCard: View {
                             .clipShape(Capsule())
                     }
                     HStack(spacing: 4) {
-                        ForEach(0..<5) { i in
-                            Image(systemName: i < Int(score.rounded()) ? "star.fill" : "star")
-                                .font(.system(size: 10)).foregroundStyle(FWColor.brandHighlight)
-                        }
-                        Text(String(format: "%.1f", score)).font(.caption).foregroundStyle(.secondary)
+                        Label("\(recommendation.worthItScore)% worth it", systemImage: "checkmark.seal.fill")
+                            .font(.caption).fontWeight(.semibold).foregroundStyle(FWColor.success)
+                        Text("· \(recommendation.worthItSummary)")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("CAD \(Int(recommendation.totalPrice))").font(.title3).fontWeight(.bold)
-                    Text("total · \(recommendation.stopoverDays) days").font(.caption2).foregroundStyle(.secondary)
+                    Text("+ hotels ~CAD \(Int(recommendation.estimatedHotelTotal))").font(.caption2).foregroundStyle(.secondary)
                 }
             }
             .padding(16)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                DecisionChip(icon: "bed.double.fill", text: "\(recommendation.stopoverDays) days · hotels from CAD \(city.estimatedHotelPerNight)/night")
+                DecisionChip(icon: "person.2.fill", text: city.familyLogistics)
+                DecisionChip(icon: "doc.text.magnifyingglass", text: city.visaSummary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
 
             Divider()
 
@@ -135,7 +144,7 @@ struct RecommendationCard: View {
                     Label("Save CAD \(Int(recommendation.savings)) vs direct", systemImage: "tag.fill")
                         .font(.caption).fontWeight(.semibold).foregroundStyle(FWColor.success)
                 } else {
-                    Label("Just CAD \(Int(-recommendation.savings)) more — with a \(recommendation.stopoverDays)-day bonus trip", systemImage: "sparkles")
+                    Label("CAD \(Int(-recommendation.savings)) more before hotels — compare comfort", systemImage: "scale.3d")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -147,6 +156,24 @@ struct RecommendationCard: View {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: FWRadius.xl2))
         .fwShadow(.md)
+    }
+}
+
+struct DecisionChip: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundStyle(FWColor.brandPrimary)
+                .frame(width: 16)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(FWColor.textMuted)
+                .lineLimit(2)
+        }
     }
 }
 
@@ -178,7 +205,7 @@ struct DirectFlightBanner: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Direct comparison: ~CAD $1,072")
                     .font(.subheadline).fontWeight(.semibold)
-                Text("A quick connection with no destination. See if FlyWith can beat it — and give you a vacation too.")
+                Text("FlyWith compares the fare against hotel cost, airport comfort, visa friction, and travel fatigue.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

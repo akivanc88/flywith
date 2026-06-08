@@ -26,21 +26,53 @@ struct RecommendationDetailView: View {
                 .padding(.horizontal)
 
                 // Price breakdown
-                FWSection("Price breakdown") {
+                FWSection("Worth-it verdict") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("\(recommendation.worthItScore)%")
+                                .font(.system(size: 40, weight: .heavy, design: .rounded))
+                                .foregroundStyle(FWColor.success)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(recommendation.worthItSummary)
+                                    .font(.headline)
+                                Text("Scored for fare, hotel cost, stopover length, airport comfort, and family suitability.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Divider()
+                        InsightRow(icon: "figure.and.child.holdinghands", title: "Family logistics", bodyText: city.familyLogistics)
+                        InsightRow(icon: "figure.roll", title: "Accessibility", bodyText: city.accessibilityNotes)
+                        InsightRow(icon: "airplane.circle", title: "Airport comfort", bodyText: city.airportComfort)
+                    }
+                }
+                .padding(.horizontal)
+
+                FWSection("Total cost check") {
                     VStack(spacing: 10) {
                         PriceRow(label: "Leg 1: \(recommendation.leg1.origin) → \(recommendation.leg1.destination)", price: recommendation.leg1.price)
                         PriceRow(label: "Leg 2: \(recommendation.leg2.origin) → \(recommendation.leg2.destination)", price: recommendation.leg2.price)
+                        PriceRow(label: "Estimated hotel base", price: recommendation.estimatedHotelTotal)
                         Divider()
-                        PriceRow(label: "Total (2 tickets)", price: recommendation.totalPrice, isBold: true)
+                        PriceRow(label: "Flight + hotel estimate", price: recommendation.estimatedTripTotal, isBold: true)
                         PriceRow(label: "Direct comparison", price: recommendation.directComparisonPrice, style: .strikethrough)
                         HStack {
-                            Text(recommendation.hasSavings ? "You save" : "Extra for \(recommendation.stopoverDays) days in \(city.cityName)")
+                            Text(recommendation.hasSavings ? "Fare savings before hotels" : "Fare premium before hotels")
                             Spacer()
                             Text("CAD \(Int(abs(recommendation.savings)))")
                                 .fontWeight(.bold)
                                 .foregroundStyle(recommendation.hasSavings ? FWColor.success : FWColor.brandAccent)
                         }
                         .font(.subheadline)
+                    }
+                }
+                .padding(.horizontal)
+
+                // Visa and gap
+                FWSection("Visa and booking confidence") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        InsightRow(icon: "doc.text.magnifyingglass", title: "Visa check", bodyText: city.visaSummary)
+                        InsightRow(icon: "exclamationmark.triangle", title: "Known market gap", bodyText: city.researchGap)
                     }
                 }
                 .padding(.horizontal)
@@ -68,23 +100,14 @@ struct RecommendationDetailView: View {
                 }
                 .padding(.horizontal)
 
-                // Visa
-                FWSection("Visa info") {
-                    HStack {
-                        Image(systemName: "checkmark.seal.fill").foregroundStyle(FWColor.success)
-                        Text("No visa needed 🎉 Free 30-day stay for Canadian passport holders.")
-                        Spacer()
-                    }
-                    .font(.subheadline)
-                }
-                .padding(.horizontal)
-
                 // Book buttons
                 VStack(spacing: 12) {
                     BookButton(title: "Book Leg 1 on Kiwi", subtitle: "\(recommendation.leg1.origin) → \(recommendation.leg1.destination) · CAD \(Int(recommendation.leg1.price))", url: recommendation.leg1.bookingURL, color: FWColor.brandPrimary)
                     BookButton(title: "Book Leg 2 on Kiwi", subtitle: "\(recommendation.leg2.origin) → \(recommendation.leg2.destination) · CAD \(Int(recommendation.leg2.price))", url: recommendation.leg2.bookingURL, color: FWColor.booking)
                     Text("Can't find a better deal? Check Google Flights or Skyscanner.")
                         .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    Text("FlyWith does not sell tickets in v1. It explains the tradeoff, then hands off to booking sites.")
+                        .font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     HStack(spacing: 12) {
                         Link("Google Flights ↗", destination: URL(string: "https://flights.google.com")!)
                         Link("Skyscanner ↗", destination: URL(string: "https://www.skyscanner.com")!)
@@ -107,6 +130,29 @@ struct RecommendationDetailView: View {
                         .foregroundStyle(isSaved ? FWColor.brandAccent : FWColor.brandPrimary)
                 }
                 .accessibilityLabel(isSaved ? "Remove \(city.cityName) from saved trips" : "Save \(city.cityName)")
+            }
+        }
+    }
+}
+
+struct InsightRow: View {
+    let icon: String
+    let title: String
+    let bodyText: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .foregroundStyle(FWColor.brandPrimary)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(FWColor.textStrong)
+                Text(bodyText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
