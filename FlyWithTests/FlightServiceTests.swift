@@ -282,8 +282,9 @@ final class LetsFGDecodingTests: XCTestCase {
         """.data(using: .utf8)!
 
         let response = try JSONDecoder().decode(LetsFGSingleSearchResponse.self, from: json)
-        XCTAssertEqual(response.results.first?.price, 277.00, accuracy: 0.01)
-        XCTAssertEqual(response.results.first?.outbound.routeStr, "DXB-BOM")
+        let offer = try XCTUnwrap(response.results.first)
+        XCTAssertEqual(offer.price, 277.00, accuracy: 0.01)
+        XCTAssertEqual(offer.outbound.routeStr, "DXB-BOM")
     }
 
     func testDecodeOfferWithConditions() throws {
