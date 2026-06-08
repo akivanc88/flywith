@@ -5,15 +5,27 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-build-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     name: Build FlyWith (Xcode)
     runs-on: macos-14        # Xcode 15 + iOS 17 SDK
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
 
       - name: Select Xcode 15
         run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
@@ -22,20 +34,23 @@ jobs:
         run: xcodebuild -version
 
       - name: Build (simulator, no signing)
+        env:
+          NSUnbufferedIO: YES
         run: |
+          set -o pipefail
           xcodebuild \
-            -project FlyWith/FlyWith.xcodeproj \
+            -project FlyWith.xcodeproj \
             -scheme FlyWith \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             build \
-            | xcpretty || exit 1
+            2>&1 | tee /tmp/xcodebuild.log
 
       - name: Upload build log on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: build-log
           path: /tmp/*.log
