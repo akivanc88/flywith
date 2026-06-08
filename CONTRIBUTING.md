@@ -13,8 +13,9 @@ Thanks for wanting to help. FlyWith exists because too many people have eaten te
 1. Fork and clone the repo
 2. Open `FlyWith/FlyWith.xcodeproj` in Xcode (requires Xcode 15+, iOS 17 SDK)
 3. Build and run — **no API key needed**. The app ships with mock data that works out of the box in Simulator
-4. To test live Kiwi prices, get a free API key at [tequila.kiwi.com](https://tequila.kiwi.com) and set `KIWI_API_KEY` in your Xcode scheme:
-   - Product → Scheme → Edit Scheme → Run → Arguments → Environment Variables
+4. To test live prices, set one of the following in your Xcode scheme (Product → Scheme → Edit Scheme → Run → Arguments → Environment Variables):
+   - `LETSFG_API_KEY` — preferred. Register a free 90-day token at [letsfg.co/developers](https://letsfg.co/developers)
+   - `KIWI_API_KEY` — legacy fallback. Free key at [tequila.kiwi.com](https://tequila.kiwi.com)
 
 ## Code style
 
