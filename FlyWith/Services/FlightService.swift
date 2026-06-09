@@ -2,19 +2,28 @@ import Foundation
 import Combine
 
 // MARK: - Flight Service
-// Integrates with Kiwi.com Tequila API for live pricing.
-// Set KIWI_API_KEY in your Xcode scheme environment variables.
-// Without an API key, mock data is used automatically so the app
-// works in Simulator out of the box after cloning.
+// Primary backend: LetsFG API (set LETSFG_API_KEY in Xcode scheme).
+// Legacy fallback: Kiwi.com Tequila API (set KIWI_API_KEY).
+// Neither key set: mock data, works in Simulator out of the box.
+//
+// LETSFG_API_KEY: 90-day Bearer token from letsfg.co/developers.
+// Rotate before expiry. Never commit to version control.
 
-final class FlightService: ObservableObject {
+final class FlightService: ObservableObject, FlightServiceProtocol {
 
-    private let kiwiBase = "https://api.tequila.kiwi.com"
+    // MARK: - Backend selection
 
-    private let kiwiAPIKey: String = ProcessInfo.processInfo.environment["KIWI_API_KEY"] ?? ""
+    private let letsfgAPIKey: String = ProcessInfo.processInfo.environment["LETSFG_API_KEY"] ?? ""
+    private let kiwiAPIKey: String   = ProcessInfo.processInfo.environment["KIWI_API_KEY"] ?? ""
 
-    /// True when no API key is present — app runs entirely on local sample data.
-    var useMockData: Bool { kiwiAPIKey.isEmpty }
+    private enum SearchBackend { case letsfg, kiwi, mock }
+    private var activeBackend: SearchBackend {
+        if !letsfgAPIKey.isEmpty { return .letsfg }
+        if !kiwiAPIKey.isEmpty   { return .kiwi }
+        return .mock
+    }
+
+    var useMockData: Bool { activeBackend == .mock }
 
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -25,20 +34,233 @@ final class FlightService: ObservableObject {
     // MARK: - Search
 
     func search(_ query: FlightSearch) {
+        cancellables.removeAll()
         isLoading = true
         errorMessage = nil
         recommendations = []
 
-        // Use mock data if no API key is configured (simulator-friendly)
-        if useMockData {
+        switch activeBackend {
+        case .mock:
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
                 guard let self else { return }
                 self.loadMockRecommendations(for: query)
                 self.isLoading = false
             }
-            return
+        case .kiwi:
+            searchWithKiwi(query)
+        case .letsfg:
+            searchWithLetsFG(query)
+        }
+    }
+
+    // MARK: - LetsFG Backend
+
+    private let letsfgBase = "https://letsfg.co/developers/api/v1"
+    private static let iso8601 = ISO8601DateFormatter()
+
+    func searchWithLetsFG(_ query: FlightSearch) {
+        let candidates = scoredCities(for: query.criteria)
+        let cities = Array(candidates.prefix(5))
+
+        let isoDate = isoDateString(from: query.departureDate)
+        let leg2Date = isoDateString(from: Calendar.current.date(
+            byAdding: .day, value: query.minStopoverDays, to: query.departureDate
+        ) ?? query.departureDate)
+
+        let passengers = LetsFGPassengers(
+            adults: query.adultCount,
+            children: query.childCount,
+            infants: query.infantCount
+        )
+
+        let segments = cities.map {
+            LetsFGSearchSegment(origin: query.origin, destination: $0.iataCode, date: isoDate)
+        }
+        let multiReq = LetsFGMultiSearchRequest(
+            segments: segments,
+            passengers: passengers,
+            currency: "CAD",
+            limit: 1
+        )
+
+        letsfgPublisher(endpoint: "/flights/multi-search", body: multiReq, responseType: LetsFGMultiSearchResponse.self)
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] result in
+                    if case .failure(let error) = result {
+                        self?.errorMessage = "Flight search failed: \(error.localizedDescription)"
+                        self?.isLoading = false
+                    }
+                },
+                receiveValue: { [weak self] response in
+                    guard let self else { return }
+                    var leg1Map: [String: LetsFGFlightOffer] = [:]
+                    for (index, destResult) in response.results.enumerated() {
+                        let iata = destResult.destination.isEmpty
+                            ? (index < cities.count ? cities[index].iataCode : "")
+                            : destResult.destination
+                        if let offer = destResult.offers.first {
+                            leg1Map[iata] = offer
+                        }
+                    }
+                    self.fetchLeg2ForAll(
+                        cities: cities,
+                        destination: query.destination,
+                        date: leg2Date,
+                        passengers: passengers,
+                        leg1Map: leg1Map,
+                        query: query
+                    )
+                }
+            )
+            .store(in: &cancellables)
+    }
+
+    private func fetchLeg2ForAll(
+        cities: [StopoverCity],
+        destination: String,
+        date: String,
+        passengers: LetsFGPassengers,
+        leg1Map: [String: LetsFGFlightOffer],
+        query: FlightSearch
+    ) {
+        let leg2Publishers = cities.map { city -> AnyPublisher<(StopoverCity, LetsFGFlightOffer)?, Never> in
+            guard leg1Map[city.iataCode] != nil else {
+                return Just(nil).eraseToAnyPublisher()
+            }
+            let req = LetsFGSingleSearchRequest(
+                origin: city.iataCode,
+                destination: destination,
+                date: date,
+                passengers: passengers,
+                currency: "CAD",
+                limit: 1
+            )
+            return letsfgPublisher(endpoint: "/flights/search", body: req, responseType: LetsFGSingleSearchResponse.self)
+                .map { res -> (StopoverCity, LetsFGFlightOffer)? in
+                    guard let offer = res.results.first else { return nil }
+                    return (city, offer)
+                }
+                .replaceError(with: nil)
+                .eraseToAnyPublisher()
         }
 
+        Publishers.MergeMany(leg2Publishers)
+            .collect()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] pairs in
+                guard let self else { return }
+                self.recommendations = pairs
+                    .compactMap { pair -> StopoverRecommendation? in
+                        guard let (city, leg2Offer) = pair,
+                              let leg1Offer = leg1Map[city.iataCode]
+                        else { return nil }
+                        return self.buildLetsFGRecommendation(
+                            query: query, stopover: city,
+                            leg1: leg1Offer, leg2: leg2Offer
+                        )
+                    }
+                    .sorted {
+                        $0.stopoverCity.scores.score(for: query.criteria) >
+                        $1.stopoverCity.scores.score(for: query.criteria)
+                    }
+                self.isLoading = false
+            }
+            .store(in: &cancellables)
+    }
+
+    func buildLetsFGRecommendation(
+        query: FlightSearch,
+        stopover: StopoverCity,
+        leg1: LetsFGFlightOffer,
+        leg2: LetsFGFlightOffer
+    ) -> StopoverRecommendation {
+        let badge: RecommendationBadge = switch query.criteria {
+        case .withKids:      .familyPick
+        case .withSeniors:   .seniorFriendly
+        case .budgetFocused: .budgetGem
+        case .explorer:      .adventurersPick
+        }
+
+        return StopoverRecommendation(
+            stopoverCity: stopover,
+            leg1: mapLeg(offer: leg1,
+                         origin: query.origin, originCity: "",
+                         destination: stopover.iataCode, destinationCity: stopover.cityName),
+            leg2: mapLeg(offer: leg2,
+                         origin: stopover.iataCode, originCity: stopover.cityName,
+                         destination: query.destination, destinationCity: ""),
+            stopoverDays: query.minStopoverDays,
+            totalPrice: leg1.price + leg2.price,
+            directComparisonPrice: 1072,  // TODO: fetch live direct price
+            badge: badge
+        )
+    }
+
+    func mapLeg(
+        offer: LetsFGFlightOffer,
+        origin: String,
+        originCity: String,
+        destination: String,
+        destinationCity: String
+    ) -> FlightLeg {
+        let itin = offer.outbound
+        let depart = FlightService.iso8601.date(from: itin.departureAt) ?? Date()
+        let arrive = FlightService.iso8601.date(from: itin.arrivalAt) ?? Date()
+        return FlightLeg(
+            origin: origin,
+            originCity: originCity,
+            destination: destination,
+            destinationCity: destinationCity,
+            departureTime: depart,
+            arrivalTime: arrive,
+            durationMinutes: itin.totalDurationSeconds / 60,
+            airline: itin.carrier,
+            price: offer.price,
+            currency: offer.currency,
+            bookingURL: offer.bookingUrl,
+            stops: itin.stopovers.map {
+                FlightStop(airportCode: $0.airportCode, cityName: $0.cityName,
+                           layoverMinutes: $0.layoverSeconds / 60)
+            }
+        )
+    }
+
+    private func letsfgPublisher<B: Encodable, R: Decodable>(
+        endpoint: String,
+        body: B,
+        responseType: R.Type
+    ) -> AnyPublisher<R, Error> {
+        guard let url = URL(string: letsfgBase + endpoint) else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(letsfgAPIKey)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONEncoder().encode(body)
+        return URLSession.shared.dataTaskPublisher(for: req)
+            .tryMap { data, response -> Data in
+                guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+                guard (200..<300).contains(http.statusCode) else {
+                    throw LetsFGAPIError.httpError(statusCode: http.statusCode)
+                }
+                return data
+            }
+            .decode(type: R.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+
+    private func isoDateString(from date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        return fmt.string(from: date)
+    }
+
+    // MARK: - Kiwi Backend
+
+    private func searchWithKiwi(_ query: FlightSearch) {
         let candidates = scoredCities(for: query.criteria)
         let group = DispatchGroup()
         var results: [StopoverRecommendation] = []
@@ -61,7 +283,7 @@ final class FlightService: ObservableObject {
         }
     }
 
-    // MARK: - Kiwi API
+    private let kiwiBase = "https://api.tequila.kiwi.com"
 
     private func fetchStopoverPair(
         query: FlightSearch,
@@ -126,10 +348,10 @@ final class FlightService: ObservableObject {
         leg2: KiwiItinerary
     ) -> StopoverRecommendation {
         let badge: RecommendationBadge = switch query.criteria {
-        case .withKids: .familyPick
-        case .withSeniors: .seniorFriendly
+        case .withKids:      .familyPick
+        case .withSeniors:   .seniorFriendly
         case .budgetFocused: .budgetGem
-        case .explorer: .adventurersPick
+        case .explorer:      .adventurersPick
         }
 
         return StopoverRecommendation(
@@ -172,6 +394,18 @@ final class FlightService: ObservableObject {
     private func scoredCities(for criteria: TravelerCriteria) -> [StopoverCity] {
         StopoverCity.sampleCities.sorted {
             $0.scores.score(for: criteria) > $1.scores.score(for: criteria)
+        }
+    }
+}
+
+// MARK: - LetsFG Error
+
+private enum LetsFGAPIError: Error, LocalizedError {
+    case httpError(statusCode: Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .httpError(let code): return "LetsFG API returned HTTP \(code)"
         }
     }
 }

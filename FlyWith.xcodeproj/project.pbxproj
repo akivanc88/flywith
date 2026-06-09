@@ -19,7 +19,20 @@
 		2D2D2D2D2D2D2D2D2D2D2D2D /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B0B0B0B0B0B0B0B0B0B0B0B /* SavedView.swift */; };
 		2E2E2E2E2E2E2E2E2E2E2E2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C0C0C0C0C0C0C0C0C0C0C0C /* Assets.xcassets */; };
 		2F2F2F2F2F2F2F2F2F2F2F2F /* FlyWithTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */; };
+		4A4A4A4A4A4A4A4A4A4A4A4A /* LetsFGFlightModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3A3A3A3A3A3A3A3A3A3A3A /* LetsFGFlightModels.swift */; };
+		4B4B4B4B4B4B4B4B4B4B4B4B /* FlightServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3B3B3B3B3B3B3B3B3B3B3B /* FlightServiceProtocol.swift */; };
+		4C4C4C4C4C4C4C4C4C4C4C4C /* FlightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3C3C3C3C3C3C3C3C3C3C3C /* FlightServiceTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7B7B7B7B7B7B7B7B7B7B7B7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1A1A1A1A1A1A1A1A1A1A1A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B1B1B1B1B1B1B1B1B1B1B1B1;
+			remoteInfo = FlyWith;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		010101010101010101010101 /* FlyWith.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlyWith.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,10 +48,21 @@
 		0B0B0B0B0B0B0B0B0B0B0B0B /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
 		0C0C0C0C0C0C0C0C0C0C0C0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyWithTokens.swift; sourceTree = "<group>"; };
+		3A3A3A3A3A3A3A3A3A3A3A3A /* LetsFGFlightModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetsFGFlightModels.swift; sourceTree = "<group>"; };
+		3B3B3B3B3B3B3B3B3B3B3B3B /* FlightServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightServiceProtocol.swift; sourceTree = "<group>"; };
+		3C3C3C3C3C3C3C3C3C3C3C3C /* FlightServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightServiceTests.swift; sourceTree = "<group>"; };
+		3D3D3D3D3D3D3D3D3D3D3D3D /* FlyWithTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlyWithTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E2E2E2E2E2E2E2E2E2E2E2E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C5C5C5C5C5C5C5C5C5C5C5C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -52,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				F2F2F2F2F2F2F2F2F2F2F2F2 /* FlyWith */,
+				5D5D5D5D5D5D5D5D5D5D5D5D /* FlyWithTests */,
 				F7F7F7F7F7F7F7F7F7F7F7F7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				010101010101010101010101 /* FlyWith.app */,
+				3D3D3D3D3D3D3D3D3D3D3D3D /* FlyWithTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				030303030303030303030303 /* FlightModels.swift */,
+				3A3A3A3A3A3A3A3A3A3A3A3A /* LetsFGFlightModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -111,6 +138,7 @@
 			children = (
 				040404040404040404040404 /* FlightService.swift */,
 				050505050505050505050505 /* MockData.swift */,
+				3B3B3B3B3B3B3B3B3B3B3B3B /* FlightServiceProtocol.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -121,6 +149,14 @@
 				0D0D0D0D0D0D0D0D0D0D0D0D /* FlyWithTokens.swift */,
 			);
 			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		5D5D5D5D5D5D5D5D5D5D5D5D /* FlyWithTests */ = {
+			isa = PBXGroup;
+			children = (
+				3C3C3C3C3C3C3C3C3C3C3C3C /* FlightServiceTests.swift */,
+			);
+			path = FlyWithTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -143,6 +179,23 @@
 			productReference = 010101010101010101010101 /* FlyWith.app */;
 			productType = "com.apple.product-type.application";
 		};
+		5A5A5A5A5A5A5A5A5A5A5A5A /* FlyWithTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C6C6C6C6C6C6C6C6C6C6C6C /* Build configuration list for PBXNativeTarget "FlyWithTests" */;
+			buildPhases = (
+				5B5B5B5B5B5B5B5B5B5B5B5B /* Sources */,
+				5C5C5C5C5C5C5C5C5C5C5C5C /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7A7A7A7A7A7A7A7A7A7A7A7A /* PBXTargetDependency */,
+			);
+			name = FlyWithTests;
+			productName = FlyWithTests;
+			productReference = 3D3D3D3D3D3D3D3D3D3D3D3D /* FlyWithTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -155,6 +208,10 @@
 				TargetAttributes = {
 					B1B1B1B1B1B1B1B1B1B1B1B1 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					5A5A5A5A5A5A5A5A5A5A5A5A = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = B1B1B1B1B1B1B1B1B1B1B1B1;
 					};
 				};
 			};
@@ -172,6 +229,7 @@
 			projectRoot = "";
 			targets = (
 				B1B1B1B1B1B1B1B1B1B1B1B1 /* FlyWith */,
+				5A5A5A5A5A5A5A5A5A5A5A5A /* FlyWithTests */,
 			);
 		};
 /* End PBXProject section */
@@ -203,10 +261,28 @@
 				2C2C2C2C2C2C2C2C2C2C2C2C /* RecommendationDetailView.swift in Sources */,
 				2D2D2D2D2D2D2D2D2D2D2D2D /* SavedView.swift in Sources */,
 				2F2F2F2F2F2F2F2F2F2F2F2F /* FlyWithTokens.swift in Sources */,
+				4A4A4A4A4A4A4A4A4A4A4A4A /* LetsFGFlightModels.swift in Sources */,
+				4B4B4B4B4B4B4B4B4B4B4B4B /* FlightServiceProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5B5B5B5B5B5B5B5B5B5B5B5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C4C4C4C4C4C4C4C4C4C4C4C /* FlightServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7A7A7A7A7A7A7A7A7A7A7A7A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B1B1B1B1B1B1B1B1B1B1B1B1 /* FlyWith */;
+			targetProxy = 7B7B7B7B7B7B7B7B7B7B7B7B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D1D1D1D1D1D1D1D1D1D1D1D1 /* Debug */ = {
@@ -374,6 +450,44 @@
 			};
 			name = Release;
 		};
+		6A6A6A6A6A6A6A6A6A6A6A6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flywith.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlyWith.app/FlyWith";
+			};
+			name = Debug;
+		};
+		6B6B6B6B6B6B6B6B6B6B6B6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flywith.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlyWith.app/FlyWith";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -391,6 +505,15 @@
 			buildConfigurations = (
 				D3D3D3D3D3D3D3D3D3D3D3D3 /* Debug */,
 				D4D4D4D4D4D4D4D4D4D4D4D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6C6C6C6C6C6C6C6C6C6C6C6C /* Build configuration list for PBXNativeTarget "FlyWithTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6A6A6A6A6A6A6A6A6A6A6A6A /* Debug */,
+				6B6B6B6B6B6B6B6B6B6B6B6B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

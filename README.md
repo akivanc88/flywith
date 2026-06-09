@@ -14,7 +14,7 @@ Google Flights shows you `Toronto → Mumbai from $849`. What it doesn't tell yo
 
 ## Live demo
 
-Prices fetched June 2026 via Kiwi.com:
+Prices fetched June 2026:
 
 | Route | Cost | Bonus days |
 |---|---|---|
@@ -40,7 +40,7 @@ Prices fetched June 2026 via Kiwi.com:
 | Layer | Technology |
 |---|---|
 | iOS app | Swift 5.9, SwiftUI |
-| Flight data | Kiwi.com Tequila API |
+| Flight data | LetsFG API (primary) / Kiwi.com Tequila API (legacy fallback) |
 | Web landing | Plain HTML/CSS/JS (no framework) |
 | Hosting | GitHub Pages |
 
@@ -51,7 +51,9 @@ Prices fetched June 2026 via Kiwi.com:
 1. Clone this repo
 2. Open `FlyWith/FlyWith.xcodeproj` in Xcode
 3. Set your API key in the scheme environment variables:
-   - `KIWI_API_KEY` — free at [tequila.kiwi.com](https://tequila.kiwi.com)
+   - `LETSFG_API_KEY` — register at [letsfg.co/developers](https://letsfg.co/developers) (preferred, free 90-day token)
+   - `KIWI_API_KEY` — legacy fallback, free at [tequila.kiwi.com](https://tequila.kiwi.com)
+   - If neither key is set, the app uses built-in mock data and works fully in Simulator
 4. Run on simulator or device (iOS 17+)
 
 ### Web landing page
@@ -82,8 +84,9 @@ flywith/
         │   ├── RecommendationDetailView.swift
         │   └── SavedView.swift
         └── Services/
-            ├── FlightService.swift   # Kiwi API integration
-            └── MockData.swift        # Sample data for simulator (no API key needed)
+            ├── FlightService.swift          # LetsFG + Kiwi API integration
+            ├── FlightServiceProtocol.swift  # Protocol for testability
+            └── MockData.swift               # Sample data for simulator (no API key needed)
 ```
 
 ## Roadmap

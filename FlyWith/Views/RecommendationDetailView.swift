@@ -41,9 +41,9 @@ struct RecommendationDetailView: View {
                             }
                         }
                         Divider()
-                        InsightRow(icon: "figure.and.child.holdinghands", title: "Family logistics", body: city.familyLogistics)
-                        InsightRow(icon: "figure.roll", title: "Accessibility", body: city.accessibilityNotes)
-                        InsightRow(icon: "airplane.circle", title: "Airport comfort", body: city.airportComfort)
+                        InsightRow(icon: "figure.and.child.holdinghands", title: "Family logistics", bodyText: city.familyLogistics)
+                        InsightRow(icon: "figure.roll", title: "Accessibility", bodyText: city.accessibilityNotes)
+                        InsightRow(icon: "airplane.circle", title: "Airport comfort", bodyText: city.airportComfort)
                     }
                 }
                 .padding(.horizontal)
@@ -71,8 +71,8 @@ struct RecommendationDetailView: View {
                 // Visa and gap
                 FWSection("Visa and booking confidence") {
                     VStack(alignment: .leading, spacing: 10) {
-                        InsightRow(icon: "doc.text.magnifyingglass", title: "Visa check", body: city.visaSummary)
-                        InsightRow(icon: "exclamationmark.triangle", title: "Known market gap", body: city.researchGap)
+                        InsightRow(icon: "doc.text.magnifyingglass", title: "Visa check", bodyText: city.visaSummary)
+                        InsightRow(icon: "exclamationmark.triangle", title: "Known market gap", bodyText: city.researchGap)
                     }
                 }
                 .padding(.horizontal)
@@ -138,7 +138,7 @@ struct RecommendationDetailView: View {
 struct InsightRow: View {
     let icon: String
     let title: String
-    let body: String
+    let bodyText: String
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -150,7 +150,7 @@ struct InsightRow: View {
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundStyle(FWColor.textStrong)
-                Text(body)
+                Text(bodyText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -198,7 +198,7 @@ struct BookButton: View {
     let color: Color
 
     var body: some View {
-        Link(destination: URL(string: url) ?? URL(string: "https://kiwi.com")!) {
+        Link(destination: URL(string: url) ?? URL(string: "https://letsfg.co")!) {
             VStack(spacing: 3) {
                 Text(title).font(.subheadline).fontWeight(.bold)
                 Text(subtitle).font(.caption).opacity(0.85)
