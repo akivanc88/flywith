@@ -3,759 +3,570 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FlyWith — Family Stopover Advisor</title>
-  <style>
-    :root {
-      --ink: #0f1716;
-      --brand-ink: #062a2c;
-      --muted: #64716f;
-      --accent: #0c6b6e;
-      --accent-light: #ecfbfa;
-      --accent-dark: #0e5557;
-      --coral: #ff6b4a;
-      --coral-light: #fff2ee;
-      --gold: #f5ad2a;
-      --gold-light: #fef7e7;
-      --green: #047857;
-      --green-light: #ecfdf5;
-      --amber: #874810;
-      --amber-light: #fffbeb;
-      --surface: #f8faf9;
-      --border: #e3e8e7;
-      --white: #ffffff;
-      --gradient-hero: linear-gradient(158deg, #0d5e60 0%, #0b4446 52%, #062a2c 100%);
-      --gradient-soft: linear-gradient(180deg, #ecfbfa 0%, #ffffff 100%);
-    }
+  <title>FlyWith — Is this stopover worth it for your family?</title>
+  <meta name="description" content="FlyWith turns brutal long-haul layovers into 3–7 day family adventures. We score stopover routes by fare, hotel cost, visa friction, airport comfort, accessibility, and family logistics — often cheaper than Google Flights." />
+  <meta name="theme-color" content="#0c6b6e" />
+  <link rel="icon" type="image/svg+xml" href="assets/flywith-mark.svg" />
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <!-- Open Graph -->
+  <meta property="og:title" content="FlyWith — Turn connections into adventures" />
+  <meta property="og:description" content="The family decision layer on top of flight search. Score long-haul stopovers by comfort, visas, hotel cost and fatigue — not just price." />
+  <meta property="og:type" content="website" />
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--ink);
-      background: var(--white);
-      line-height: 1.6;
-    }
-
-    /* NAV */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5vw;
-      height: 64px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo { font-size: 1.2rem; font-weight: 700; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
-    .nav-links { display: flex; gap: 2rem; }
-    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.9rem; transition: color .2s; }
-    .nav-links a:hover { color: var(--ink); }
-    .nav-cta { background: var(--accent); color: white; padding: 8px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: background .2s; }
-    .nav-cta:hover { background: var(--accent-dark); }
-
-    /* HERO */
-    .hero {
-      padding: 80px 5vw 60px;
-      text-align: center;
-      background: var(--gradient-soft);
-    }
-    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-light); color: var(--accent); font-size: 0.8rem; font-weight: 600; padding: 4px 14px; border-radius: 100px; margin-bottom: 24px; }
-    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.15; max-width: 800px; margin: 0 auto 20px; letter-spacing: -0.02em; }
-    .hero h1 em { font-style: normal; color: var(--coral); }
-    .hero p { font-size: 1.15rem; color: var(--muted); max-width: 560px; margin: 0 auto 40px; }
-    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary { background: var(--accent); color: white; padding: 14px 28px; border-radius: 12px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: background .2s, transform .1s; display: flex; align-items: center; gap: 8px; }
-    .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
-    .btn-secondary { background: var(--white); color: var(--ink); padding: 14px 28px; border-radius: 12px; font-size: 1rem; font-weight: 600; text-decoration: none; border: 2px solid var(--border); transition: border-color .2s, transform .1s; }
-    .btn-secondary:hover { border-color: var(--accent); transform: translateY(-1px); }
-
-    .hero-proof { margin-top: 48px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-    .proof-stat { text-align: center; }
-    .proof-stat .num { font-size: 1.8rem; font-weight: 800; color: var(--ink); }
-    .proof-stat .label { font-size: 0.85rem; color: var(--muted); }
-
-    /* PROBLEM BANNER */
-    .problem-banner {
-      background: var(--brand-ink); color: white;
-      padding: 20px 5vw;
-      text-align: center;
-      font-size: 0.95rem;
-    }
-    .problem-banner strong { color: #9ee6e2; }
-
-    /* DEMO SECTION */
-    .section { padding: 80px 5vw; }
-    .section-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 12px; }
-    .section-title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
-    .section-sub { font-size: 1rem; color: var(--muted); max-width: 540px; margin-bottom: 48px; }
-
-    /* INTERACTIVE DEMO */
-    .demo-container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    .demo-header {
-      background: var(--brand-ink); color: white;
-      padding: 20px 28px;
-      display: flex; align-items: center; gap: 16px;
-    }
-    .demo-header .route { font-size: 1.1rem; font-weight: 700; }
-    .demo-header .meta { font-size: 0.85rem; color: #94a09e; margin-left: auto; }
-
-    .demo-body { padding: 28px; }
-    .demo-tabs { display: flex; gap: 8px; margin-bottom: 28px; }
-    .demo-tab { padding: 8px 18px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: 2px solid var(--border); background: white; color: var(--muted); transition: all .15s; }
-    .demo-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-    .demo-panel { display: none; }
-    .demo-panel.active { display: block; }
-
-    /* Flight cards */
-    .flight-comparison { display: grid; gap: 16px; }
-    .flight-card {
-      background: white;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      position: relative;
-    }
-    .flight-card.winner { border-color: var(--accent); }
-    .flight-card.winner::before {
-      content: "✨ FlyWith Pick";
-      position: absolute; top: -12px; left: 20px;
-      background: var(--coral); color: white;
-      font-size: 0.75rem; font-weight: 700;
-      padding: 4px 12px; border-radius: 100px;
-    }
-
-    .fc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
-    .fc-route { font-weight: 700; font-size: 1rem; }
-    .fc-route .arrow { color: var(--muted); margin: 0 6px; }
-    .fc-badge { font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
-    .badge-slow { background: #fef2f2; color: #dc2626; }
-    .badge-smart { background: var(--green-light); color: var(--green); }
-
-    .fc-timeline {
-      display: flex; align-items: center; gap: 0;
-      margin: 12px 0; font-size: 0.85rem;
-    }
-    .fc-city { text-align: center; min-width: 70px; }
-    .fc-city .code { font-weight: 700; font-size: 1rem; }
-    .fc-city .time { color: var(--muted); font-size: 0.8rem; }
-    .fc-leg { flex: 1; display: flex; flex-direction: column; align-items: center; }
-    .fc-line { height: 2px; background: var(--border); width: 100%; position: relative; }
-    .fc-line::after { content: "✈"; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; }
-    .fc-dur { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-    .fc-layover-pill {
-      background: var(--gold-light); color: #a85c0c;
-      border-radius: 100px; padding: 4px 12px;
-      font-size: 0.75rem; font-weight: 700;
-      white-space: nowrap;
-    }
-    .fc-layover-pill.extended {
-      background: var(--green-light); color: var(--green);
-      font-size: 0.8rem; padding: 6px 14px;
-    }
-
-    .fc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .fc-price { font-size: 1.5rem; font-weight: 800; }
-    .fc-savings { font-size: 0.8rem; color: var(--green); font-weight: 600; }
-    .fc-savings.extra { color: var(--muted); font-style: italic; }
-    .fc-book { background: var(--accent); color: white; padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; }
-
-    /* CRITERIA */
-    .criteria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .criteria-card {
-      background: white;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all .15s;
-    }
-    .criteria-card.selected { border-color: var(--accent); background: var(--accent-light); }
-    .criteria-card .icon { font-size: 2rem; margin-bottom: 10px; }
-    .criteria-card .name { font-weight: 700; margin-bottom: 6px; }
-    .criteria-card .desc { font-size: 0.85rem; color: var(--muted); }
-
-    .criteria-result {
-      background: var(--green-light);
-      border: 1px solid #a7f3d0;
-      border-radius: 14px;
-      padding: 20px 24px;
-      display: none;
-    }
-    .criteria-result.visible { display: block; }
-    .criteria-result h3 { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: 12px; }
-    .criteria-result ul { list-style: none; }
-    .criteria-result ul li { padding: 4px 0; font-size: 0.9rem; }
-    .criteria-result ul li::before { content: "✓ "; color: var(--green); font-weight: 700; }
-
-    /* HOW IT WORKS */
-    .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
-    .how-step { }
-    .how-num { width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-    .how-step h3 { font-weight: 700; margin-bottom: 8px; }
-    .how-step p { font-size: 0.9rem; color: var(--muted); }
-
-    /* RESEARCH */
-    .research-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-    .research-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-    }
-    .research-card h3 { font-size: 1rem; margin-bottom: 8px; }
-    .research-card p { color: var(--muted); font-size: 0.9rem; }
-    .quote-strip {
-      margin-top: 28px;
-      background: var(--brand-ink);
-      color: white;
-      border-radius: 16px;
-      padding: 24px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-    }
-    .quote-strip strong { color: #9ee6e2; }
-    .quote-strip p { color: #cdf2ef; font-size: 0.9rem; }
-
-    /* PRICING TABLE */
-    .pricing-table { max-width: 800px; margin: 0 auto; }
-    .pricing-row { display: grid; grid-template-columns: 1fr 130px 130px 130px; gap: 0; border-bottom: 1px solid var(--border); }
-    .pricing-row.header { background: var(--ink); color: white; border-radius: 12px 12px 0 0; overflow: hidden; }
-    .pricing-row:last-child { border-bottom: none; border-radius: 0 0 12px 12px; overflow: hidden; }
-    .pricing-cell { padding: 14px 16px; font-size: 0.875rem; }
-    .pricing-row.header .pricing-cell { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .pricing-row:nth-child(even):not(.header) { background: var(--surface); }
-    .pricing-row.highlight { background: var(--green-light) !important; }
-    .pricing-row.highlight .pricing-cell { color: var(--green); font-weight: 600; }
-    .pricing-row.highlight .pricing-cell:first-child { color: var(--ink); font-weight: 700; }
-    .strike { text-decoration: line-through; color: var(--muted); font-size: 0.85em; }
-
-    /* APP STORE CTA */
-    .app-section {
-      background: var(--gradient-hero);
-      color: white;
-      padding: 80px 5vw;
-      text-align: center;
-    }
-    .app-section h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 16px; }
-    .app-section p { color: #cdf2ef; margin-bottom: 40px; font-size: 1rem; max-width: 480px; margin-left: auto; margin-right: auto; }
-    .app-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .app-btn {
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
-      color: white;
-      padding: 14px 24px;
-      border-radius: 14px;
-      text-decoration: none;
-      display: flex; align-items: center; gap: 12px;
-      transition: background .2s;
-      font-weight: 600;
-    }
-    .app-btn:hover { background: rgba(255,255,255,0.2); }
-    .app-btn .store-icon { font-size: 1.8rem; }
-    .app-btn .store-text { text-align: left; }
-    .app-btn .store-text small { display: block; font-size: 0.75rem; opacity: 0.7; }
-
-    /* GITHUB CTA */
-    .github-section { padding: 60px 5vw; text-align: center; border-top: 1px solid var(--border); }
-    .github-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 12px; }
-    .github-section p { color: var(--muted); margin-bottom: 28px; }
-    .github-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--brand-ink); color: white; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1rem; }
-    .github-btn:hover { opacity: 0.9; }
-
-    /* FOOTER */
-    footer { padding: 32px 5vw; text-align: center; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); }
-
-    /* RESPONSIVE */
-    @media (max-width: 600px) {
-      .nav-links { display: none; }
-      .pricing-row { grid-template-columns: 1fr 100px 100px; }
-      .pricing-row .pricing-cell:nth-child(3) { display: none; }
-      .fc-timeline { flex-wrap: wrap; }
-    }
-  </style>
+  <link rel="stylesheet" href="Web/design-tokens.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="#top"><img src="assets/flywith-mark.svg" alt="" /> FlyWith</a>
-  <div class="nav-links">
-    <a href="#how">How it works</a>
-    <a href="#demo">Demo</a>
-    <a href="#research">Research</a>
-    <a href="https://github.com/akivanc88/flywith">GitHub</a>
-  </div>
-  <a class="nav-cta" href="#app">Run the app</a>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-badge">🧳 iOS-first family stopover advisor</div>
-  <h1>Is this stopover <em>worth it</em> for your family?</h1>
-  <p>FlyWith helps diaspora families compare long-haul routes by fare, hotel cost, visa friction, airport comfort, child logistics, and travel fatigue.</p>
-  <div class="hero-buttons">
-    <a class="btn-primary" href="#demo">🔍 See worth-it demo</a>
-    <a class="btn-secondary" href="https://github.com/akivanc88/flywith">⭐ Star on GitHub</a>
-  </div>
-  <div class="hero-proof">
-    <div class="proof-stat"><div class="num">3-7 days</div><div class="label">intentional recovery stopovers</div></div>
-    <div class="proof-stat"><div class="num">100%</div><div class="label">plain-language tradeoff score</div></div>
-    <div class="proof-stat"><div class="num">4 profiles</div><div class="label">families · parents · budget · explorer</div></div>
-  </div>
-</section>
-
-<!-- PROBLEM -->
-<div class="problem-banner">
-  Google Flights can show <strong>$849 Toronto → Mumbai</strong>. It will not tell you whether that route is humane with a stroller, tired kids, older parents, visa rules, and two terminal changes. <strong>FlyWith adds the family decision layer.</strong>
-</div>
-
-<!-- HOW IT WORKS -->
-<section class="section" id="how">
-  <div class="section-label">How it works</div>
-  <div class="section-title">Not another generic flight search</div>
-  <div class="section-sub">FlyWith scores stopover cities based on your family constraints, not just connection time.</div>
-  <div class="how-grid">
-    <div class="how-step">
-      <div class="how-num">1</div>
-      <h3>Tell us your long-haul trip</h3>
-      <p>Origin, destination, dates, passenger mix, and whether you are traveling with kids, parents, seniors, or a tight budget.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num">2</div>
-      <h3>We score stopover value</h3>
-      <p>Each option gets a worth-it score using fare, hotel estimate, visa friction, airport comfort, accessibility, and family logistics.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num">3</div>
-      <h3>You compare the tradeoff</h3>
-      <p>See the standard route beside stopover options, including what still needs manual verification before booking.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num">4</div>
-      <h3>Book somewhere else</h3>
-      <p>FlyWith does not sell tickets in v1. It explains the recommendation and hands off to Kiwi, Google Flights, Skyscanner, or an airline page.</p>
-    </div>
-  </div>
-</section>
-
-<!-- INTERACTIVE DEMO -->
-<section class="section" id="demo" style="background: var(--surface); padding-top: 60px; padding-bottom: 60px;">
-  <div class="section-label">Worth-it demo</div>
-  <div class="section-title">Toronto → Mumbai, Sept 15</div>
-  <div class="section-sub">Sample Kiwi fares captured in June 2026. Switch tabs to see why price alone is not enough for family travel.</div>
-
-  <div class="demo-container">
-    <div class="demo-header">
-      <span style="font-size:1.3rem">🇨🇦</span>
-      <div class="route">Toronto (YYZ) → Mumbai (BOM)</div>
-      <div class="meta">2 adults · Economy · Sept 15, 2026</div>
-    </div>
-    <div class="demo-body">
-      <div class="demo-tabs">
-        <button class="demo-tab active" onclick="switchTab('google')">😐 Quick connections</button>
-        <button class="demo-tab" onclick="switchTab('layover')">✨ Smart layovers</button>
+  <!-- ===== NAV ===== -->
+  <header class="site-nav" role="banner">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top" aria-label="FlyWith home">
+        <img src="assets/flywith-mark.svg" alt="" width="34" height="34" /> FlyWith
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#demo">Demo</a>
+        <a href="#profiles">Profiles</a>
+        <a href="#cities">Stopovers</a>
+        <a href="#research">Why FlyWith</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="btn btn-primary nav-cta" href="#demo">See the worth-it demo</a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+    </div>
+    <div class="nav-menu-mobile" id="mobile-menu">
+      <a href="#how">How it works</a>
+      <a href="#demo">Demo</a>
+      <a href="#profiles">Profiles</a>
+      <a href="#cities">Stopovers</a>
+      <a href="#research">Why FlyWith</a>
+      <a class="btn btn-primary" href="#demo">See the worth-it demo</a>
+    </div>
+  </header>
 
-      <!-- QUICK CONNECTIONS PANEL -->
-      <div class="demo-panel active" id="tab-google">
-        <div class="flight-comparison">
+  <main id="main">
 
-          <div class="flight-card">
-            <div class="fc-header">
-              <div>
-                <div class="fc-route">Toronto <span class="arrow">→</span> Chicago <span class="arrow">→</span> Paris <span class="arrow">→</span> Mumbai</div>
-                <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Via ORD · CDG · Total journey 24h 10m</div>
-              </div>
-              <span class="fc-badge badge-slow">Short connections</span>
-            </div>
-            <div class="fc-timeline">
-              <div class="fc-city"><div class="code">YYZ</div><div class="time">1:40 PM</div></div>
-              <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">1h 55m</div></div>
-              <div class="fc-city"><div class="code">ORD</div><div class="time">2h 35m</div></div>
-              <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">8h 20m</div></div>
-              <div class="fc-city"><div class="code">CDG</div><div class="time">2h 25m</div></div>
-              <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">7h 40m</div></div>
-              <div class="fc-city"><div class="code">BOM</div><div class="time">11:20 PM</div></div>
-            </div>
-            <div style="font-size:0.8rem; color:#dc2626; background:#fef2f2; padding:8px 12px; border-radius:8px; margin-bottom:8px;">
-              ⚠️ 2h 25m connection in Paris CDG — tight for families or seniors. Terminal change required.
-            </div>
-            <div class="fc-footer">
-              <div>
-                <div class="fc-price">CAD $849</div>
-                <div class="fc-savings extra">Cheapest, but is it worth it?</div>
-              </div>
-              <a class="fc-book" href="https://on.kiwi.com/pig1Dl" target="_blank" rel="noopener">Book on Kiwi ↗</a>
-            </div>
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <span class="hero-badge reveal">🧳 The family stopover advisor</span>
+          <h1 class="reveal">Is this stopover <em>worth it</em> for your family?</h1>
+          <p class="hero-lede reveal">FlyWith finds long-haul routes with 3–7 day stopovers that turn a brutal 20-hour journey into a bonus family vacation — scored by fare, hotel cost, visa friction, airport comfort, accessibility and travel fatigue. Often cheaper than Google Flights.</p>
+          <div class="hero-cta reveal">
+            <a class="btn btn-primary" href="#demo">🔍 See the worth-it demo</a>
+            <a class="btn btn-secondary" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">⭐ Star on GitHub</a>
           </div>
+          <p class="hero-trust reveal">Toronto → Mumbai · real Kiwi fares · hands off to the cheapest booking site, every time.</p>
+        </div>
 
-          <div class="flight-card">
-            <div class="fc-header">
-              <div>
-                <div class="fc-route">Toronto <span class="arrow">→</span> Paris <span class="arrow">→</span> Mumbai</div>
-                <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Via CDG · Total journey 19h 50m</div>
-              </div>
-              <span class="fc-badge badge-slow">Short connection</span>
-            </div>
-            <div class="fc-timeline">
-              <div class="fc-city"><div class="code">YYZ</div><div class="time">6:00 PM</div></div>
-              <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">7h 25m</div></div>
-              <div class="fc-city"><div class="code">CDG</div><div class="time">3h 15m</div></div>
-              <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">8h 40m</div></div>
-              <div class="fc-city"><div class="code">BOM</div><div class="time">11:20 PM</div></div>
-            </div>
-            <div class="fc-footer">
-              <div>
-                <div class="fc-price">CAD $1,072</div>
-                <div class="fc-savings extra">More comfortable, still just a layover</div>
-              </div>
-              <a class="fc-book" href="https://on.kiwi.com/B5e840" target="_blank" rel="noopener">Book on Kiwi ↗</a>
-            </div>
-          </div>
-
+        <div class="hero-globe" aria-label="A globe showing flight routes from Toronto out to stopover cities">
+          <!-- 3D globe mounts here when supported; otherwise the SVG below shows. -->
+          <div class="globe-canvas-host" id="globe-host"></div>
+          <svg class="globe-fallback" id="globe-fallback" viewBox="0 0 460 460" role="img" aria-label="Flight arcs from Toronto to Dubai, Istanbul, Doha and Singapore">
+            <defs>
+              <radialGradient id="globeGrad" cx="38%" cy="34%" r="72%">
+                <stop offset="0%" stop-color="#0e6f72" />
+                <stop offset="60%" stop-color="#0b4a4c" />
+                <stop offset="100%" stop-color="#062a2c" />
+              </radialGradient>
+              <clipPath id="globeClip"><circle cx="230" cy="230" r="180" /></clipPath>
+            </defs>
+            <circle class="globe-face" cx="230" cy="230" r="180" />
+            <g clip-path="url(#globeClip)" opacity="0.9">
+              <ellipse class="grid-line" cx="230" cy="230" rx="60" ry="180" />
+              <ellipse class="grid-line" cx="230" cy="230" rx="120" ry="180" />
+              <ellipse class="grid-line" cx="230" cy="230" rx="180" ry="180" />
+              <line class="grid-line" x1="50" y1="230" x2="410" y2="230" />
+              <ellipse class="grid-line" cx="230" cy="150" rx="172" ry="40" />
+              <ellipse class="grid-line" cx="230" cy="310" rx="172" ry="40" />
+            </g>
+            <!-- arcs -->
+            <path class="arc" d="M95,205 Q150,90 255,110" style="--len:360; --delay:.35s" />
+            <path class="arc gold" d="M95,205 Q200,118 300,150" style="--len:360; --delay:.6s" />
+            <path class="arc gold" d="M95,205 Q200,150 315,200" style="--len:360; --delay:.85s" />
+            <path class="arc" d="M95,205 Q215,250 340,250" style="--len:360; --delay:1.1s" />
+            <!-- origin -->
+            <circle class="origin-dot" cx="95" cy="205" r="6" />
+            <text class="city-label" x="64" y="232" style="--delay:.2s">Toronto</text>
+            <!-- destinations -->
+            <circle class="city-dot" cx="255" cy="110" r="5" style="--delay:.35s" />
+            <text class="city-label" x="232" y="98" style="--delay:.35s">Istanbul</text>
+            <circle class="city-dot" cx="300" cy="150" r="5" style="--delay:.6s" />
+            <text class="city-label" x="310" y="148" style="--delay:.6s">Dubai</text>
+            <circle class="city-dot" cx="315" cy="200" r="5" style="--delay:.85s" />
+            <text class="city-label" x="325" y="204" style="--delay:.85s">Doha</text>
+            <circle class="city-dot" cx="340" cy="250" r="5" style="--delay:1.1s" />
+            <text class="city-label" x="318" y="276" style="--delay:1.1s">Singapore</text>
+          </svg>
         </div>
       </div>
 
-      <!-- SMART LAYOVERS PANEL -->
-      <div class="demo-panel" id="tab-layover">
-        <div class="flight-comparison">
+      <div class="container">
+        <div class="hero-stats reveal">
+          <div class="stat">
+            <div class="num">3–7<span class="unit">days</span></div>
+            <div class="label">intentional recovery stopovers, not rushed layovers</div>
+          </div>
+          <div class="stat">
+            <div class="num"><span data-count="100" data-suffix="%">100%</span></div>
+            <div class="label">plain-language worth-it tradeoff, never a black box</div>
+          </div>
+          <div class="stat">
+            <div class="num"><span data-count="4">4</span></div>
+            <div class="label">traveler profiles: families · seniors · budget · explorer</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="flight-card winner">
-            <div class="fc-header">
-              <div>
-                <div class="fc-route">Toronto <span class="arrow">→</span> <strong style="color:var(--accent)">Dubai 5 days</strong> <span class="arrow">→</span> Mumbai</div>
-                <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Two separate tickets · Arrives Sept 20</div>
-              </div>
-              <span class="fc-badge badge-smart">FlyWith pick</span>
+    <!-- ===== PROBLEM ===== -->
+    <section class="problem">
+      <div class="container">
+        <div class="problem-grid">
+          <div class="reveal">
+            <span class="eyebrow" style="background:rgba(255,255,255,.12); color:#9ee6e2;">The gap</span>
+            <h2>A cheap fare doesn't tell you if the route is <span class="hl">survivable</span> with kids or older parents.</h2>
+            <p>Google Flights shows the price. It won't tell you whether two terminal changes, a 2-hour sprint with a stroller, visa rules, and tired grandparents add up to a humane trip. FlyWith adds the missing decision layer — and often finds something cheaper anyway.</p>
+          </div>
+          <div class="problem-card reveal">
+            <div class="price">CAD $849<small>Toronto → Mumbai · cheapest on Google Flights</small></div>
+            <ul>
+              <li>2h 25m connection in Paris CDG — tight with a stroller</li>
+              <li>Two terminal changes, 24h 10m door to door</li>
+              <li>No read on visas, airport comfort, or first-night recovery</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2 class="section-title">Not another generic flight search</h2>
+          <p class="section-sub">FlyWith scores stopover cities by your family's real constraints — not just connection time.</p>
+        </div>
+        <div class="how-grid">
+          <div class="how-step reveal">
+            <div class="how-num">1</div>
+            <h3>Tell us your long-haul trip</h3>
+            <p>Origin, destination, dates, and whether you're traveling with kids, parents, seniors, or a tight budget.</p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-num">2</div>
+            <h3>We score stopover value</h3>
+            <p>Each option gets a worth-it score from fare, hotel estimate, visa friction, airport comfort, accessibility and family logistics.</p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-num">3</div>
+            <h3>You compare the tradeoff</h3>
+            <p>See the standard route beside stopover options in plain language, including what still needs manual verification.</p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-num">4</div>
+            <h3>Book wherever's cheapest</h3>
+            <p>FlyWith doesn't sell tickets. It explains the recommendation and hands off to Kiwi, Google Flights, Skyscanner or the airline.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DEMO ===== -->
+    <section class="section section--sunken" id="demo">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">Worth-it demo</span>
+          <h2 class="section-title">Toronto → Mumbai, September 15</h2>
+          <p class="section-sub" style="margin-left:auto;margin-right:auto;">Real Kiwi fares captured June 2026. Switch tabs to see why price alone isn't enough for family travel.</p>
+        </div>
+
+        <div class="demo-card reveal">
+          <div class="demo-top">
+            <span class="flag">🇨🇦</span>
+            <span class="route">Toronto (YYZ) → Mumbai (BOM)</span>
+            <span class="meta">2 adults · Economy · Sept 15, 2026</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-tabs" role="tablist" aria-label="Route comparison">
+              <button class="demo-tab active" role="tab" aria-selected="true" id="tab-quick" aria-controls="panel-quick" onclick="flywithSwitchTab(this,'quick')">😐 Quick connections</button>
+              <button class="demo-tab" role="tab" aria-selected="false" id="tab-smart" aria-controls="panel-smart" onclick="flywithSwitchTab(this,'smart')">✨ Smart layovers</button>
             </div>
 
-            <div style="display:grid; gap:12px; margin-bottom:16px;">
-              <div style="background:var(--surface); border-radius:10px; padding:14px;">
-                <div style="font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px;">Leg 1 — Sept 15</div>
-                <div class="fc-timeline">
-                  <div class="fc-city"><div class="code">YYZ</div><div class="time">9:00 PM</div></div>
-                  <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">via DOH · 16h 25m</div></div>
-                  <div class="fc-city"><div class="code">DXB</div><div class="time">9:25 PM +1</div></div>
+            <!-- QUICK CONNECTIONS -->
+            <div class="demo-panel active" id="panel-quick" role="tabpanel" aria-labelledby="tab-quick">
+              <article class="flight-card">
+                <div class="fc-head">
+                  <div>
+                    <div class="fc-route">Toronto <span class="arrow">→</span> Chicago <span class="arrow">→</span> Paris <span class="arrow">→</span> Mumbai</div>
+                    <div class="fc-sub">Via ORD · CDG · total journey 24h 10m</div>
+                  </div>
+                  <span class="fc-badge badge-slow">Short connections</span>
                 </div>
-              </div>
-
-              <div style="text-align:center;">
-                <span class="fc-layover-pill extended">🏙️ 5 days in Dubai · Sept 16–20 · 4.9★ family score</span>
-              </div>
-
-              <div style="background:var(--surface); border-radius:10px; padding:14px;">
-                <div style="font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px;">Leg 2 — Sept 20</div>
-                <div class="fc-timeline">
-                  <div class="fc-city"><div class="code">DXB</div><div class="time">11:40 PM</div></div>
-                  <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">3h 15m</div></div>
-                  <div class="fc-city"><div class="code">BOM</div><div class="time">4:25 AM +1</div></div>
+                <div class="timeline">
+                  <div class="tl-city"><span class="code">YYZ</span><span class="time">1:40 PM</span></div>
+                  <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">1h 55m</span></div>
+                  <div class="tl-city"><span class="code">ORD</span><span class="time">2h 35m stop</span></div>
+                  <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">8h 20m</span></div>
+                  <div class="tl-city"><span class="code">CDG</span><span class="time">2h 25m stop</span></div>
+                  <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">7h 40m</span></div>
+                  <div class="tl-city"><span class="code">BOM</span><span class="time">11:20 PM</span></div>
                 </div>
-              </div>
+                <div class="score-note" style="background:#fef2f2;color:#b91c1c;">⚠️ 2h 25m connection in Paris CDG — tight for families or seniors, and a terminal change is required.</div>
+                <div class="fc-foot">
+                  <div>
+                    <div class="fc-price">CAD $849</div>
+                    <div class="fc-gain muted">Cheapest — but is it worth it?</div>
+                  </div>
+                  <div class="fc-actions"><a class="book-link" href="https://on.kiwi.com/pig1Dl" target="_blank" rel="noopener">Book on Kiwi ↗</a></div>
+                </div>
+              </article>
+
+              <article class="flight-card">
+                <div class="fc-head">
+                  <div>
+                    <div class="fc-route">Toronto <span class="arrow">→</span> Paris <span class="arrow">→</span> Mumbai</div>
+                    <div class="fc-sub">Via CDG · total journey 19h 50m</div>
+                  </div>
+                  <span class="fc-badge badge-slow">Short connection</span>
+                </div>
+                <div class="timeline">
+                  <div class="tl-city"><span class="code">YYZ</span><span class="time">6:00 PM</span></div>
+                  <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">7h 25m</span></div>
+                  <div class="tl-city"><span class="code">CDG</span><span class="time">3h 15m stop</span></div>
+                  <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">8h 40m</span></div>
+                  <div class="tl-city"><span class="code">BOM</span><span class="time">11:20 PM</span></div>
+                </div>
+                <div class="fc-foot">
+                  <div>
+                    <div class="fc-price">CAD $1,072</div>
+                    <div class="fc-gain muted">More comfortable — still just a layover</div>
+                  </div>
+                  <div class="fc-actions"><a class="book-link" href="https://on.kiwi.com/B5e840" target="_blank" rel="noopener">Book on Kiwi ↗</a></div>
+                </div>
+              </article>
             </div>
 
-            <div style="background:var(--accent-light); border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:0.85rem;">
-              <strong>👨‍👩‍👧 Family score:</strong> Dubai has world-class airports with kids' play areas, stroller-friendly facilities, and no visa required for Canadians (free 30-day stay). Burj Khalifa, Dubai Mall, and beach within easy reach.
-            </div>
+            <!-- SMART LAYOVERS -->
+            <div class="demo-panel" id="panel-smart" role="tabpanel" aria-labelledby="tab-smart" hidden>
+              <article class="flight-card winner">
+                <span class="ribbon">✨ FlyWith Pick</span>
+                <div class="fc-head">
+                  <div>
+                    <div class="fc-route">Toronto <span class="arrow">→</span> <span class="accent">Dubai · 5 days</span> <span class="arrow">→</span> Mumbai</div>
+                    <div class="fc-sub">Two separate tickets · arrives Sept 20</div>
+                  </div>
+                  <span class="fc-badge badge-smart">Worth it</span>
+                </div>
+                <div class="leg-box">
+                  <div class="leg-label">Leg 1 — Sept 15</div>
+                  <div class="timeline">
+                    <div class="tl-city"><span class="code">YYZ</span><span class="time">9:00 PM</span></div>
+                    <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">via DOH · 16h 25m</span></div>
+                    <div class="tl-city"><span class="code">DXB</span><span class="time">9:25 PM +1</span></div>
+                  </div>
+                </div>
+                <div class="center-row" style="margin:12px 0;">
+                  <span class="stopover-pill">🏙️ 5 days in Dubai · Sept 16–20 · 4.9★ family score</span>
+                </div>
+                <div class="leg-box">
+                  <div class="leg-label">Leg 2 — Sept 20</div>
+                  <div class="timeline">
+                    <div class="tl-city"><span class="code">DXB</span><span class="time">11:40 PM</span></div>
+                    <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">3h 15m</span></div>
+                    <div class="tl-city"><span class="code">BOM</span><span class="time">4:25 AM +1</span></div>
+                  </div>
+                </div>
+                <div class="score-note"><strong>👨‍👩‍👧 Family score:</strong> Dubai has world-class airports with kids' play areas, stroller-friendly facilities, and no visa required for Canadians (free 30-day stay). Burj Khalifa, Dubai Mall and the beach are within easy reach.</div>
+                <div class="fc-foot">
+                  <div>
+                    <div class="fc-price">CAD $1,107</div>
+                    <div class="fc-pricesub">$926 (YYZ→DXB) + $181 (DXB→BOM)</div>
+                    <div class="fc-gain">🏖️ 5 bonus days in Dubai for just $258 more than cheapest</div>
+                  </div>
+                  <div class="fc-actions">
+                    <a class="book-link alt" href="https://on.kiwi.com/haDND2" target="_blank" rel="noopener">Leg 1 ↗</a>
+                    <a class="book-link" href="https://on.kiwi.com/i7UN1y" target="_blank" rel="noopener">Leg 2 ↗</a>
+                  </div>
+                </div>
+              </article>
 
-            <div class="fc-footer">
-              <div>
-                <div class="fc-price">CAD $1,107</div>
-                <div style="font-size:0.8rem; color:var(--muted);">$926 (YYZ→DXB) + $181 (DXB→BOM)</div>
-                <div class="fc-savings">🏖️ 5 bonus days in Dubai for just $258 more than cheapest</div>
-              </div>
-              <div style="display:flex; gap:8px; flex-direction:column; align-items:flex-end;">
-                <a class="fc-book" href="https://on.kiwi.com/haDND2" target="_blank" rel="noopener" style="text-align:center;">Leg 1 ↗</a>
-                <a class="fc-book" href="https://on.kiwi.com/i7UN1y" target="_blank" rel="noopener" style="text-align:center; background: var(--green);">Leg 2 ↗</a>
-              </div>
+              <article class="flight-card">
+                <div class="fc-head">
+                  <div>
+                    <div class="fc-route">Toronto <span class="arrow">→</span> <span class="amber">Istanbul · 4 days</span> <span class="arrow">→</span> Mumbai</div>
+                    <div class="fc-sub">Two separate tickets · arrives Sept 19</div>
+                  </div>
+                  <span class="fc-badge badge-budget">Budget pick</span>
+                </div>
+                <div class="leg-box">
+                  <div class="leg-label">Leg 1 — Sept 15</div>
+                  <div class="timeline">
+                    <div class="tl-city"><span class="code">YYZ</span><span class="time">9:00 PM</span></div>
+                    <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">14h · direct</span></div>
+                    <div class="tl-city"><span class="code">IST</span><span class="time">2:00 PM +1</span></div>
+                  </div>
+                </div>
+                <div class="center-row" style="margin:12px 0;">
+                  <span class="stopover-pill gold">🕌 4 days in Istanbul · Bazaars, Hagia Sophia, Bosphorus</span>
+                </div>
+                <div class="leg-box">
+                  <div class="leg-label">Leg 2 — Sept 19</div>
+                  <div class="timeline">
+                    <div class="tl-city"><span class="code">IST</span><span class="time">8:15 PM</span></div>
+                    <div class="tl-leg"><div class="tl-line"></div><span class="tl-dur">5h 45m</span></div>
+                    <div class="tl-city"><span class="code">BOM</span><span class="time">2:30 AM +1</span></div>
+                  </div>
+                </div>
+                <div class="fc-foot">
+                  <div>
+                    <div class="fc-price">CAD $1,066</div>
+                    <div class="fc-pricesub">Leg 1 + Leg 2 combined</div>
+                    <div class="fc-gain">🌍 4 days in Istanbul for just $17 more than a rushed connection</div>
+                  </div>
+                  <div class="fc-actions"><a class="book-link" href="https://on.kiwi.com/xLTROB" target="_blank" rel="noopener">Book on Kiwi ↗</a></div>
+                </div>
+              </article>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="flight-card">
-            <div class="fc-header">
-              <div>
-                <div class="fc-route">Toronto <span class="arrow">→</span> <strong style="color:#d97706">Istanbul 4 days</strong> <span class="arrow">→</span> Mumbai</div>
-                <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Two separate tickets · Arrives Sept 19</div>
-              </div>
-              <span class="fc-badge" style="background:var(--amber-light); color:var(--amber);">Budget pick</span>
-            </div>
+    <!-- ===== PROFILES ===== -->
+    <section class="section" id="profiles">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Personalization</span>
+          <h2 class="section-title">Who's traveling?</h2>
+          <p class="section-sub">FlyWith scores every layover city differently by travel profile. Pick one to see how the recommendations change.</p>
+        </div>
+        <div class="profile-grid">
+          <button class="profile-card" type="button" data-profile="family" aria-pressed="false">
+            <div class="ico" aria-hidden="true">👨‍👩‍👧‍👦</div>
+            <div class="name">Traveling with kids</div>
+            <div class="desc">Airports with play areas, short connections, and cities with child-friendly attractions.</div>
+          </button>
+          <button class="profile-card" type="button" data-profile="seniors" aria-pressed="false">
+            <div class="ico" aria-hidden="true">👴👵</div>
+            <div class="name">Traveling with seniors</div>
+            <div class="desc">Short walks between terminals, wheelchair-friendly cities, and leisurely itineraries.</div>
+          </button>
+          <button class="profile-card" type="button" data-profile="budget" aria-pressed="false">
+            <div class="ico" aria-hidden="true">💸</div>
+            <div class="name">Budget traveler</div>
+            <div class="desc">Maximum savings even with longer layovers — free-visa cities and affordable hotels.</div>
+          </button>
+          <button class="profile-card" type="button" data-profile="explorer" aria-pressed="false">
+            <div class="ico" aria-hidden="true">🧭</div>
+            <div class="name">Adventure seeker</div>
+            <div class="desc">Off-the-beaten-path layover cities you'd never think to book deliberately.</div>
+          </button>
+        </div>
+        <div class="profile-result" id="profile-result" hidden>
+          <h3 id="profile-result-title"></h3>
+          <ul id="profile-result-list"></ul>
+        </div>
+      </div>
+    </section>
 
-            <div style="display:grid; gap:12px; margin-bottom:16px;">
-              <div style="background:var(--surface); border-radius:10px; padding:14px;">
-                <div style="font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px;">Leg 1 — Sept 15</div>
-                <div class="fc-timeline">
-                  <div class="fc-city"><div class="code">YYZ</div><div class="time">9:00 PM</div></div>
-                  <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">14h · direct</div></div>
-                  <div class="fc-city"><div class="code">IST</div><div class="time">2:00 PM +1</div></div>
-                </div>
-              </div>
-              <div style="text-align:center;">
-                <span class="fc-layover-pill extended">🕌 4 days in Istanbul · Bazaars, Hagia Sophia, Bosphorus</span>
-              </div>
-              <div style="background:var(--surface); border-radius:10px; padding:14px;">
-                <div style="font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px;">Leg 2 — Sept 19</div>
-                <div class="fc-timeline">
-                  <div class="fc-city"><div class="code">IST</div><div class="time">8:15 PM</div></div>
-                  <div class="fc-leg"><div class="fc-line"></div><div class="fc-dur">5h 45m</div></div>
-                  <div class="fc-city"><div class="code">BOM</div><div class="time">2:30 AM +1</div></div>
-                </div>
-              </div>
-            </div>
+    <!-- ===== CITY SHOWCASE ===== -->
+    <!-- City photos sourced from Unsplash (free to use under the Unsplash License),
+         self-hosted under assets/img/. Dubai: photo-1512453979798-5ea266f8880c ·
+         Istanbul: photo-1541432901042-2d8bd64b4a9b · Singapore: photo-1525625293386-3f8f99389edd -->
+    <section class="section section--sunken" id="cities">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Stopover cities</span>
+          <h2 class="section-title">Turn a connection into the trip everyone remembers</h2>
+          <p class="section-sub">A few favorites from the FlyWith index, with the worth-it score and the family details Google Flights leaves out.</p>
+        </div>
+        <div class="city-grid">
 
-            <div class="fc-footer">
-              <div>
-                <div class="fc-price">CAD $1,066</div>
-                <div style="font-size:0.8rem; color:var(--muted);">Leg 1 + Leg 2 combined</div>
-                <div class="fc-savings">🌍 4 days in Istanbul for just $17 more than a rushed connection</div>
-              </div>
-              <a class="fc-book" href="https://on.kiwi.com/xLTROB" target="_blank" rel="noopener">Book on Kiwi ↗</a>
+          <article class="city-card reveal">
+            <div class="city-art">
+              <img src="assets/img/dubai.jpg" alt="Dubai skyline at golden hour, with the Burj Khalifa rising above the city" loading="lazy" decoding="async" width="900" height="600" />
+              <div class="city-scrim"></div>
+              <span class="city-tag">Family pick</span>
+              <div class="city-head"><div class="name">Dubai</div><div class="code">DXB · United Arab Emirates</div></div>
             </div>
-          </div>
+            <div class="city-body">
+              <div class="city-score"><span class="val">4.6</span><span class="of">/ 5 worth-it</span><span class="who who-family">Families 4.9★</span></div>
+              <p>An easy, polished first stop: stroller-friendly terminals, kids' play zones, short taxi rides, and familiar food. Best for families who want a low-stress recovery day before South Asia.</p>
+              <div class="city-meta">
+                <span class="chip visa">🛂 Visa-free for many passports</span>
+                <span class="chip">🏨 ~CAD $120/night</span>
+                <span class="chip">♿ Strong accessibility</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="city-card reveal">
+            <div class="city-art">
+              <img src="assets/img/istanbul.jpg" alt="The domes and minarets of Istanbul's Blue Mosque at sunset" loading="lazy" decoding="async" width="900" height="626" />
+              <div class="city-scrim"></div>
+              <span class="city-tag">Budget gem</span>
+              <div class="city-head"><div class="name">Istanbul</div><div class="code">IST · Türkiye</div></div>
+            </div>
+            <div class="city-body">
+              <div class="city-score"><span class="val">4.5</span><span class="of">/ 5 worth-it</span><span class="who who-budget">Budget 4.9★</span></div>
+              <p>Incredible value: culture, food and a slower break before the final leg. A 4-day stopover costs about $17 more than a rushed connection — and you get a real vacation.</p>
+              <div class="city-meta">
+                <span class="chip visa">🛂 Free e-visa for Canadians</span>
+                <span class="chip">🏨 ~CAD $60/night</span>
+                <span class="chip">🕌 Hagia Sophia · Bosphorus</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="city-card reveal">
+            <div class="city-art">
+              <img src="assets/img/singapore.jpg" alt="Aerial view of Singapore's Marina Bay Sands and Gardens by the Bay at dusk" loading="lazy" decoding="async" width="900" height="694" />
+              <div class="city-scrim"></div>
+              <span class="city-tag">Family pick</span>
+              <div class="city-head"><div class="name">Singapore</div><div class="code">SIN · Singapore</div></div>
+            </div>
+            <div class="city-body">
+              <div class="city-score"><span class="val">4.7</span><span class="of">/ 5 worth-it</span><span class="who who-family">Families 5.0★</span></div>
+              <p>One of the easiest airports on earth for kids and seniors — Changi has indoor slides and a butterfly garden. Premium but low-stress when comfort matters more than the lowest fare.</p>
+              <div class="city-meta">
+                <span class="chip visa">🛂 Often visa-free for short stays</span>
+                <span class="chip">🏨 ~CAD $180/night</span>
+                <span class="chip">🛝 Changi slides · Gardens by the Bay</span>
+              </div>
+            </div>
+          </article>
 
         </div>
       </div>
+    </section>
 
-    </div>
-  </div>
-</section>
-
-<!-- CRITERIA SELECTOR -->
-<section class="section" id="criteria">
-  <div class="section-label">Personalization</div>
-  <div class="section-title">Who's traveling?</div>
-  <div class="section-sub">FlyWith scores every layover city differently based on your travel profile. Try selecting one:</div>
-
-  <div class="criteria-grid">
-    <div class="criteria-card" onclick="selectCriteria('family')">
-      <div class="icon">👨‍👩‍👧‍👦</div>
-      <div class="name">Traveling with kids</div>
-      <div class="desc">Prioritizes airports with play areas, short connections, and cities with child-friendly attractions.</div>
-    </div>
-    <div class="criteria-card" onclick="selectCriteria('seniors')">
-      <div class="icon">👴👵</div>
-      <div class="name">Traveling with seniors</div>
-      <div class="desc">Prefers short walks between terminals, wheelchair-friendly cities, and leisurely itineraries.</div>
-    </div>
-    <div class="criteria-card" onclick="selectCriteria('budget')">
-      <div class="icon">💸</div>
-      <div class="name">Budget traveler</div>
-      <div class="desc">Maximizes savings even with longer layovers. Finds free visa cities and affordable hotels.</div>
-    </div>
-    <div class="criteria-card" onclick="selectCriteria('explorer')">
-      <div class="icon">🧭</div>
-      <div class="name">Adventure seeker</div>
-      <div class="desc">Picks off-the-beaten-path layover cities you'd never consider booking deliberately.</div>
-    </div>
-  </div>
-
-  <div class="criteria-result" id="criteria-result">
-    <h3 id="criteria-result-title"></h3>
-    <ul id="criteria-result-list"></ul>
-  </div>
-</section>
-
-<!-- RESEARCH -->
-<section class="section" id="research" style="background:var(--surface);">
-  <div class="section-label">Market gap</div>
-  <div class="section-title">Families still do the hard part manually</div>
-  <div class="section-sub">Competitors solve pieces of the journey. FlyWith focuses on the missing decision: whether a stopover is actually better for the people traveling.</div>
-
-  <div class="research-grid">
-    <div class="research-card">
-      <h3>Google Flights and Skyscanner</h3>
-      <p>Excellent inventory and flexible search, but users must already know how to model stopovers, multi-city fares, visas, and separate-ticket risk.</p>
-    </div>
-    <div class="research-card">
-      <h3>Airwander, Stovo, GetStopover</h3>
-      <p>They frame stopovers as bonus destinations, but rarely score family comfort, stroller logistics, senior accessibility, or first-night recovery.</p>
-    </div>
-    <div class="research-card">
-      <h3>Going and Hopper</h3>
-      <p>Strong at alerts and price confidence. They do not answer whether a cheaper route is survivable with kids or older parents.</p>
-    </div>
-    <div class="research-card">
-      <h3>Airline stopover programs</h3>
-      <p>Great perks when eligible, but rules vary by airline, route, fare, passport, and timing. Travelers need neutral comparison.</p>
-    </div>
-  </div>
-
-  <div class="quote-strip">
-    <div>
-      <strong>Stopover confusion</strong>
-      <p>Travelers often discover through Reddit that 24+ hours is a stopover, not a layover, and that multi-city search may be required.</p>
-    </div>
-    <div>
-      <strong>Family travel pain</strong>
-      <p>Parents ask about stroller handling, layover length, play areas, sleep, snacks, and whether the cheapest route is worth the stress.</p>
-    </div>
-    <div>
-      <strong>Parents and seniors</strong>
-      <p>Adult children worry about wheelchair assistance, terminal walks, medication carry-on, rest windows, and missed connections.</p>
-    </div>
-  </div>
-</section>
-
-<!-- PRICING COMPARISON TABLE -->
-<section class="section" id="pricing">
-  <div class="section-label">Price comparison</div>
-  <div class="section-title">Toronto → Mumbai, realistic fares</div>
-  <div class="section-sub">Kiwi fare snapshot captured in June 2026 for a September 2026 trip.</div>
-
-  <div class="pricing-table">
-    <div class="pricing-row header">
-      <div class="pricing-cell">Route</div>
-      <div class="pricing-cell">Total cost</div>
-      <div class="pricing-cell">Journey time</div>
-      <div class="pricing-cell">Bonus days</div>
-    </div>
-    <div class="pricing-row">
-      <div class="pricing-cell"><strong>YYZ → ORD → CDG → BOM</strong><br><small style="color:var(--muted)">Cheapest, tight connections</small></div>
-      <div class="pricing-cell"><strong>CAD $849</strong></div>
-      <div class="pricing-cell">24h 10m</div>
-      <div class="pricing-cell">—</div>
-    </div>
-    <div class="pricing-row">
-      <div class="pricing-cell"><strong>YYZ → CDG → BOM</strong><br><small style="color:var(--muted)">More comfortable</small></div>
-      <div class="pricing-cell"><strong>CAD $1,072</strong></div>
-      <div class="pricing-cell">19h 50m</div>
-      <div class="pricing-cell">—</div>
-    </div>
-    <div class="pricing-row">
-      <div class="pricing-cell"><strong>YYZ → IST → BOM</strong><br><small style="color:var(--muted)">Via Turkish Airlines hub</small></div>
-      <div class="pricing-cell"><strong>CAD $1,063</strong></div>
-      <div class="pricing-cell">21h 45m</div>
-      <div class="pricing-cell">—</div>
-    </div>
-    <div class="pricing-row highlight">
-      <div class="pricing-cell">✨ <strong>YYZ → DXB (5 days) → BOM</strong><br><small>FlyWith extended layover</small></div>
-      <div class="pricing-cell"><strong>CAD $1,107</strong><br><small>$926 + $181</small></div>
-      <div class="pricing-cell">16h 25m<br>+ 3h 15m</div>
-      <div class="pricing-cell"><strong>5 days Dubai</strong></div>
-    </div>
-    <div class="pricing-row highlight">
-      <div class="pricing-cell">✨ <strong>YYZ → IST (4 days) → BOM</strong><br><small>FlyWith extended layover</small></div>
-      <div class="pricing-cell"><strong>CAD $1,066</strong><br><small>Combined fare</small></div>
-      <div class="pricing-cell">14h<br>+ 5h 45m</div>
-      <div class="pricing-cell"><strong>4 days Istanbul</strong></div>
-    </div>
-    <div class="pricing-row">
-      <div class="pricing-cell"><strong>YYZ → DXB → BOM</strong><br><small style="color:var(--muted)">Emirates direct connection</small></div>
-      <div class="pricing-cell"><strong>CAD $1,407</strong></div>
-      <div class="pricing-cell">17h 15m</div>
-      <div class="pricing-cell">—</div>
-    </div>
-  </div>
-
-  <p style="text-align:center; color:var(--muted); font-size:0.85rem; margin-top:24px;">
-    When we can't beat a price, we link directly to <strong>Google Flights</strong>, <strong>Skyscanner</strong>, and <strong>Kiwi</strong> so you're never stuck.
-  </p>
-</section>
-
-<!-- APP STORE CTA -->
-<section class="app-section" id="app">
-  <div class="hero-badge" style="background:rgba(255,255,255,0.1); color:white;">📱 iOS app in development</div>
-  <h2>Join the family stopover waitlist</h2>
-  <p>FlyWith is moving from mock demo to real app cautiously: live fares first, then verified visa rules, airport comfort, hotel estimates, and price watch.</p>
-  <div class="app-buttons">
-    <a class="app-btn" href="https://github.com/akivanc88/flywith">
-      <div class="store-icon">⌘</div>
-      <div class="store-text">
-        <small>Run prototype in</small>
-        Xcode
+    <!-- ===== RESEARCH / WHY ===== -->
+    <section class="section" id="research">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Why FlyWith</span>
+          <h2 class="section-title">Families still do the hard part manually</h2>
+          <p class="section-sub">Competitors solve pieces of the journey. FlyWith focuses on the missing decision: whether a stopover is actually better for the people traveling.</p>
+        </div>
+        <div class="research-grid">
+          <div class="research-card reveal"><span class="vs">vs. Google Flights &amp; Skyscanner</span><h3>Great inventory, no judgment</h3><p>Excellent flexible search — but you must already know how to model stopovers, multi-city fares, visas and separate-ticket risk yourself.</p></div>
+          <div class="research-card reveal"><span class="vs">vs. Airwander, Stovo, GetStopover</span><h3>Adventure, but not for families</h3><p>They frame stopovers as bonus destinations, yet rarely score family comfort, stroller logistics, senior accessibility or first-night recovery.</p></div>
+          <div class="research-card reveal"><span class="vs">vs. Going &amp; Hopper</span><h3>Price alerts, not survivability</h3><p>Strong at deals and price confidence. They don't answer whether a cheaper route is actually doable with kids or older parents.</p></div>
+          <div class="research-card reveal"><span class="vs">vs. Airline stopover programs</span><h3>Perks with fine print</h3><p>Great when eligible, but rules vary by airline, route, fare, passport and timing. Travelers need a neutral comparison.</p></div>
+        </div>
+        <div class="quote-strip reveal">
+          <div><h4>Stopover confusion</h4><p>Travelers often learn through Reddit that 24+ hours is a stopover, not a layover, and that multi-city search may be required.</p></div>
+          <div><h4>Family travel pain</h4><p>Parents ask about stroller handling, layover length, play areas, sleep, snacks — and whether the cheapest route is worth the stress.</p></div>
+          <div><h4>Parents &amp; seniors</h4><p>Adult children worry about wheelchair assistance, terminal walks, medication carry-on, rest windows and missed connections.</p></div>
+        </div>
       </div>
-    </a>
-    <a class="app-btn" href="https://github.com/akivanc88/flywith">
-      <div class="store-icon">⭐</div>
-      <div class="store-text">
-        <small>Follow the real app on</small>
-        GitHub
+    </section>
+
+    <!-- ===== PRICING ===== -->
+    <section class="section section--sunken" id="pricing">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">Price comparison</span>
+          <h2 class="section-title">Toronto → Mumbai, realistic fares</h2>
+          <p class="section-sub" style="margin-left:auto;margin-right:auto;">Kiwi fare snapshot captured June 2026 for a September 2026 trip.</p>
+        </div>
+        <div class="pricing-wrap reveal">
+          <table class="ptable">
+            <thead>
+              <tr><th>Route</th><th>Total cost</th><th>Journey time</th><th>Bonus days</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="route-cell"><span class="route-name">YYZ → ORD → CDG → BOM</span><span class="route-sub">Cheapest, tight connections</span></td>
+                <td data-label="Total cost" class="num">CAD $849</td>
+                <td data-label="Journey time">24h 10m</td>
+                <td data-label="Bonus days">—</td>
+              </tr>
+              <tr>
+                <td class="route-cell"><span class="route-name">YYZ → CDG → BOM</span><span class="route-sub">More comfortable</span></td>
+                <td data-label="Total cost" class="num">CAD $1,072</td>
+                <td data-label="Journey time">19h 50m</td>
+                <td data-label="Bonus days">—</td>
+              </tr>
+              <tr>
+                <td class="route-cell"><span class="route-name">YYZ → IST → BOM</span><span class="route-sub">Via Turkish Airlines hub</span></td>
+                <td data-label="Total cost" class="num">CAD $1,063</td>
+                <td data-label="Journey time">21h 45m</td>
+                <td data-label="Bonus days">—</td>
+              </tr>
+              <tr class="highlight">
+                <td class="route-cell"><span class="route-name">✨ YYZ → DXB (5 days) → BOM</span><span class="route-sub">FlyWith extended layover</span></td>
+                <td data-label="Total cost" class="num">CAD $1,107 <span class="route-sub">$926 + $181</span></td>
+                <td data-label="Journey time">16h 25m + 3h 15m</td>
+                <td data-label="Bonus days" class="bonus">5 days Dubai</td>
+              </tr>
+              <tr class="highlight">
+                <td class="route-cell"><span class="route-name">✨ YYZ → IST (4 days) → BOM</span><span class="route-sub">FlyWith extended layover</span></td>
+                <td data-label="Total cost" class="num">CAD $1,066 <span class="route-sub">combined fare</span></td>
+                <td data-label="Journey time">14h + 5h 45m</td>
+                <td data-label="Bonus days" class="bonus">4 days Istanbul</td>
+              </tr>
+              <tr>
+                <td class="route-cell"><span class="route-name">YYZ → DXB → BOM</span><span class="route-sub">Emirates direct connection</span></td>
+                <td data-label="Total cost" class="num">CAD $1,407</td>
+                <td data-label="Journey time">17h 15m</td>
+                <td data-label="Bonus days">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pricing-foot reveal">When we can't beat a price, we link directly to <strong>Google Flights</strong>, <strong>Skyscanner</strong> and <strong>Kiwi</strong> so you're never stuck.</p>
       </div>
-    </a>
-  </div>
-</section>
+    </section>
 
-<!-- GITHUB -->
-<section class="github-section">
-  <h2>Open source & built in public</h2>
-  <p>FlyWith is fully open source. Built with SwiftUI, plain HTML/JS, and Kiwi.com Tequila API support. PRs welcome.</p>
-  <a class="github-btn" href="https://github.com/akivanc88/flywith">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-    View on GitHub
-  </a>
-</section>
+    <!-- ===== CTA ===== -->
+    <section class="section cta" id="app">
+      <div class="container">
+        <span class="badge-light reveal">📱 iOS app in development</span>
+        <h2 class="reveal">Join the family stopover waitlist</h2>
+        <p class="reveal">FlyWith is moving from mock demo to real app carefully: live fares first, then verified visa rules, airport comfort, hotel estimates and price watch.</p>
+        <div class="cta-actions reveal">
+          <a class="btn btn-ghost" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">⌘ Run the prototype in Xcode</a>
+          <a class="btn btn-ghost" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">⭐ Follow on GitHub</a>
+        </div>
+      </div>
+    </section>
 
-<footer>
-  FlyWith is an open-source project. Demo flight prices are Kiwi fare snapshots from June 2026. Not affiliated with any airline.
-  Built with ❤️ for travelers who hate wasted layovers.
-</footer>
+    <!-- ===== OPEN SOURCE ===== -->
+    <section class="section opensource">
+      <div class="container">
+        <h2 class="reveal">Open source &amp; built in public</h2>
+        <p class="reveal">FlyWith is fully open source — built with SwiftUI, plain HTML/JS, and Kiwi.com Tequila API support. PRs welcome.</p>
+        <a class="gh-btn reveal" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </section>
+  </main>
 
-<script>
-  function switchTab(id) {
-    document.querySelectorAll('.demo-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && id === 'google') || (i === 1 && id === 'layover')));
-    document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-  }
+  <footer class="site-foot">
+    <div class="container">
+      FlyWith is an open-source project. Demo flight prices are Kiwi fare snapshots from June 2026. Not affiliated with any airline.<br/>
+      Built with ❤️ for travelers who hate wasted layovers · <a href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">github.com/akivanc88/flywith</a>
+    </div>
+  </footer>
 
-  const criteriaData = {
-    family: {
-      title: '👨‍👩‍👧‍👦 Family-optimized recommendations',
-      items: [
-        'Dubai (DXB): No visa for Canadians, world-class airport play zones, stroller lanes, Legoland nearby',
-        'Singapore (SIN): Changi Airport has indoor slides & butterfly garden — kids love the layover itself',
-        'Amsterdam (AMS): KLM family lounges, Anne Frank House for older kids, short taxi distances',
-        'Avoids: Long connection sprints, multi-terminal transfers, cities with poor infant facilities',
-      ]
-    },
-    seniors: {
-      title: '👴👵 Senior-optimized recommendations',
-      items: [
-        'Dubai (DXB): Excellent wheelchair access, golf cart shuttles, no visa required, short flying sectors',
-        'Frankfurt (FRA): Compact terminal, Lufthansa Senator lounge, direct lift access throughout',
-        'Doha (DOH): Hamad International rated #1 for comfort, no crowds, efficient medical services',
-        'Avoids: Rushed connections under 2 hours, multi-terminal airports, cities with uneven terrain',
-      ]
-    },
-    budget: {
-      title: '💸 Budget-optimized recommendations',
-      items: [
-        'Istanbul (IST): Free e-visa for Canadians, cheap hotels from $40/night, incredible food scene',
-        'Kuala Lumpur (KUL): No visa required, world-class budget transport, KLIA2 budget hub',
-        'Colombo (CMB): Surprisingly cheap stopover, visa on arrival, stunning beaches nearby',
-        'Tip: A 4-day stopover in Istanbul costs $17 more than a quick connection — and you get a vacation',
-      ]
-    },
-    explorer: {
-      title: '🧭 Explorer picks (off the beaten path)',
-      items: [
-        'Tbilisi, Georgia (TBS): Hidden gem, no visa, ancient caves, incredible wine, $25/night hotels',
-        'Muscat, Oman (MCT): Underrated, stunning architecture, desert adventures, zero tourists',
-        'Colombo, Sri Lanka (CMB): Spice markets, Buddhism, surf — most travelers fly right over it',
-        'Baku, Azerbaijan (GYD): The "Dubai of the Caucasus" — futuristic city almost nobody has heard of',
-      ]
-    }
-  };
-
-  function selectCriteria(key) {
-    document.querySelectorAll('.criteria-card').forEach(c => c.classList.remove('selected'));
-    event.currentTarget.classList.add('selected');
-    const data = criteriaData[key];
-    document.getElementById('criteria-result-title').textContent = data.title;
-    const list = document.getElementById('criteria-result-list');
-    list.innerHTML = data.items.map(i => `<li>${i}</li>`).join('');
-    const result = document.getElementById('criteria-result');
-    result.classList.add('visible');
-    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-</script>
-
+  <!-- Vendored libraries (self-hosted, no CDN dependency). All animation is
+       progressive enhancement; the page is fully usable if these fail to load. -->
+  <script defer src="assets/vendor/gsap.min.js"></script>
+  <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script defer src="assets/vendor/three.min.js"></script>
+  <script defer src="assets/js/main.js"></script>
+  <script defer src="assets/js/globe-land.js"></script>
+  <script defer src="assets/js/globe.js"></script>
 </body>
 </html>
