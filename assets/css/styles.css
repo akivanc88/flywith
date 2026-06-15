@@ -246,6 +246,7 @@ html.anim .globe-fallback .city-dot, html.anim .globe-fallback .city-label { opa
 .city-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg, 0 8px 18px rgba(15,23,22,.1)); }
 .city-art { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
 .city-art svg { width: 100%; height: 100%; }
+.city-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .city-scrim { position: absolute; inset: 0; background: var(--gradient-photo-scrim, linear-gradient(to top, rgba(8,18,18,.88), rgba(6,42,44,0) 60%)); }
 .city-tag { position: absolute; top: 14px; left: 14px; z-index: 2; font-size: .76rem; font-weight: 750; padding: 5px 12px; border-radius: var(--radius-full,9999px); background: rgba(255,255,255,.92); color: var(--color-brand-primary,#0c6b6e); }
 .city-head { position: absolute; left: 18px; bottom: 14px; z-index: 2; color: #fff; }

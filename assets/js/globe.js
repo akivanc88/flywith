@@ -66,24 +66,33 @@
   );
   world.add(core);
 
-  // Dotted surface (modern globe look)
-  var dotCount = 1400;
-  var dotPos = new Float32Array(dotCount * 3);
-  var gold = 1 + Math.sqrt(5);
-  for (var i = 0; i < dotCount; i++) {
-    var t = i / dotCount;
-    var inc = Math.acos(1 - 2 * t);
-    var az = gold * Math.PI * i;
-    var v = new THREE.Vector3(
-      Math.sin(inc) * Math.cos(az),
-      Math.cos(inc),
-      Math.sin(inc) * Math.sin(az)
-    ).multiplyScalar(R * 1.002);
-    dotPos[i * 3] = v.x; dotPos[i * 3 + 1] = v.y; dotPos[i * 3 + 2] = v.z;
+  // Dotted surface — dots fall only on real landmasses so continents read as
+  // continents (COBE / Linear style). Positions are pre-baked in globe-land.js
+  // from a land/ocean mask; fall back to a uniform sphere if that file is absent.
+  var dotPos;
+  if (window.FLYWITH_LAND_DOTS && window.FLYWITH_LAND_DOTS.length) {
+    var src = window.FLYWITH_LAND_DOTS;
+    dotPos = new Float32Array(src.length);
+    for (var i = 0; i < src.length; i++) dotPos[i] = src[i] * (R * 1.002);
+  } else {
+    var dotCount = 1400;
+    dotPos = new Float32Array(dotCount * 3);
+    var gold = 1 + Math.sqrt(5);
+    for (var i = 0; i < dotCount; i++) {
+      var t = i / dotCount;
+      var inc = Math.acos(1 - 2 * t);
+      var az = gold * Math.PI * i;
+      var v = new THREE.Vector3(
+        Math.sin(inc) * Math.cos(az),
+        Math.cos(inc),
+        Math.sin(inc) * Math.sin(az)
+      ).multiplyScalar(R * 1.002);
+      dotPos[i * 3] = v.x; dotPos[i * 3 + 1] = v.y; dotPos[i * 3 + 2] = v.z;
+    }
   }
   var dotGeo = new THREE.BufferGeometry();
   dotGeo.setAttribute("position", new THREE.BufferAttribute(dotPos, 3));
-  var dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: 0x7fe3df, size: 0.018, transparent: true, opacity: 0.55 }));
+  var dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: 0x7fe3df, size: 0.02, transparent: true, opacity: 0.78 }));
   world.add(dots);
 
   // Latitude/longitude grid

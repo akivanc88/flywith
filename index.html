@@ -378,6 +378,9 @@
     </section>
 
     <!-- ===== CITY SHOWCASE ===== -->
+    <!-- City photos sourced from Unsplash (free to use under the Unsplash License),
+         self-hosted under assets/img/. Dubai: photo-1512453979798-5ea266f8880c ·
+         Istanbul: photo-1541432901042-2d8bd64b4a9b · Singapore: photo-1525625293386-3f8f99389edd -->
     <section class="section section--sunken" id="cities">
       <div class="container">
         <div class="section-head reveal">
@@ -389,19 +392,7 @@
 
           <article class="city-card reveal">
             <div class="city-art">
-              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                <defs><linearGradient id="skyDubai" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a8a8d"/><stop offset="1" stop-color="#f5ad2a"/></linearGradient></defs>
-                <rect width="400" height="250" fill="url(#skyDubai)"/>
-                <circle cx="320" cy="70" r="34" fill="#fff" opacity=".22"/>
-                <g fill="#06343a" opacity=".92">
-                  <polygon points="188,250 196,40 204,250"/>
-                  <polygon points="196,40 200,28 204,250 196,250"/>
-                  <rect x="120" y="150" width="26" height="100"/><rect x="150" y="120" width="22" height="130"/>
-                  <rect x="218" y="135" width="24" height="115"/><rect x="246" y="165" width="30" height="85"/>
-                  <rect x="280" y="140" width="20" height="110"/><rect x="86" y="175" width="22" height="75"/>
-                  <rect x="306" y="170" width="26" height="80"/><rect x="58" y="195" width="20" height="55"/>
-                </g>
-              </svg>
+              <img src="assets/img/dubai.jpg" alt="Dubai skyline at golden hour, with the Burj Khalifa rising above the city" loading="lazy" decoding="async" width="900" height="600" />
               <div class="city-scrim"></div>
               <span class="city-tag">Family pick</span>
               <div class="city-head"><div class="name">Dubai</div><div class="code">DXB · United Arab Emirates</div></div>
@@ -419,20 +410,7 @@
 
           <article class="city-card reveal">
             <div class="city-art">
-              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                <defs><linearGradient id="skyIst" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c6b6e"/><stop offset="1" stop-color="#ff6b4a"/></linearGradient></defs>
-                <rect width="400" height="250" fill="url(#skyIst)"/>
-                <circle cx="80" cy="64" r="30" fill="#fff" opacity=".2"/>
-                <g fill="#06343a" opacity=".92">
-                  <rect x="120" y="250" width="0" height="0"/>
-                  <path d="M150 250 V150 a50 50 0 0 1 100 0 V250 Z"/>
-                  <path d="M175 150 a25 40 0 0 1 50 0 Z"/>
-                  <rect x="120" y="120" width="9" height="130"/><polygon points="120,120 124.5,104 129,120"/>
-                  <rect x="271" y="120" width="9" height="130"/><polygon points="271,120 275.5,104 280,120"/>
-                  <path d="M250 250 V175 a30 30 0 0 1 60 0 V250 Z"/>
-                  <path d="M90 250 V185 a26 26 0 0 1 52 0 V250 Z" opacity=".8"/>
-                </g>
-              </svg>
+              <img src="assets/img/istanbul.jpg" alt="The domes and minarets of Istanbul's Blue Mosque at sunset" loading="lazy" decoding="async" width="900" height="626" />
               <div class="city-scrim"></div>
               <span class="city-tag">Budget gem</span>
               <div class="city-head"><div class="name">Istanbul</div><div class="code">IST · Türkiye</div></div>
@@ -450,18 +428,7 @@
 
           <article class="city-card reveal">
             <div class="city-art">
-              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                <defs><linearGradient id="skySin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e6f72"/><stop offset="1" stop-color="#7fe3df"/></linearGradient></defs>
-                <rect width="400" height="250" fill="url(#skySin)"/>
-                <circle cx="320" cy="66" r="30" fill="#fff" opacity=".22"/>
-                <g fill="#06343a" opacity=".92">
-                  <rect x="120" y="120" width="26" height="130"/><rect x="170" y="120" width="26" height="130"/><rect x="220" y="120" width="26" height="130"/>
-                  <path d="M110 118 q90 -44 156 0 q-78 26 -156 0 Z"/>
-                  <rect x="300" y="150" width="22" height="100"/><rect x="78" y="165" width="20" height="85"/>
-                  <rect x="332" y="175" width="22" height="75"/>
-                </g>
-                <g fill="#06343a" opacity=".5"><circle cx="60" cy="150" r="14"/><rect x="58" y="150" width="4" height="100"/></g>
-              </svg>
+              <img src="assets/img/singapore.jpg" alt="Aerial view of Singapore's Marina Bay Sands and Gardens by the Bay at dusk" loading="lazy" decoding="async" width="900" height="694" />
               <div class="city-scrim"></div>
               <span class="city-tag">Family pick</span>
               <div class="city-head"><div class="name">Singapore</div><div class="code">SIN · Singapore</div></div>
@@ -599,6 +566,7 @@
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script defer src="assets/vendor/three.min.js"></script>
   <script defer src="assets/js/main.js"></script>
+  <script defer src="assets/js/globe-land.js"></script>
   <script defer src="assets/js/globe.js"></script>
 </body>
 </html>
