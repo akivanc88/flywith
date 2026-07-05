@@ -1,93 +1,108 @@
 import Foundation
 
-// MARK: - LetsFG Request Models
+// MARK: - LetsFG Agent API Requests
 
-struct LetsFGPassengers: Encodable {
-    let adults: Int
-    let children: Int
-    let infants: Int
-}
-
-struct LetsFGSearchSegment: Encodable {
+struct LetsFGAgentSearchRequest: Encodable {
     let origin: String
     let destination: String
-    let date: String  // "yyyy-MM-dd"
+    let dateFrom: String
+
+    enum CodingKeys: String, CodingKey {
+        case origin, destination
+        case dateFrom = "date_from"
+    }
 }
 
-struct LetsFGMultiSearchRequest: Encodable {
-    let segments: [LetsFGSearchSegment]
-    let passengers: LetsFGPassengers
-    let currency: String
-    let limit: Int
+struct LetsFGAgentQuerySearchRequest: Encodable {
+    let query: String
 }
 
-struct LetsFGSingleSearchRequest: Encodable {
-    let origin: String
-    let destination: String
-    let date: String  // "yyyy-MM-dd"
-    let passengers: LetsFGPassengers
-    let currency: String
-    let limit: Int
+// MARK: - LetsFG Agent API Responses
+
+struct LetsFGSearchStartResponse: Decodable {
+    let searchId: String?
+    let status: String
+    let needsClarification: Bool?
+    let followUpQuestions: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case searchId = "search_id"
+        case needsClarification = "needs_clarification"
+        case followUpQuestions = "follow_up_questions"
+    }
 }
 
-// MARK: - LetsFG Response Models
+struct LetsFGSearchResultsResponse: Decodable {
+    let status: String
+    let totalResults: Int?
+    let cheapestPrice: Double?
+    let offers: [LetsFGAgentOffer]?
+    let progress: LetsFGSearchProgress?
 
-struct LetsFGMultiSearchResponse: Decodable {
-    let results: [LetsFGDestinationResult]
+    enum CodingKeys: String, CodingKey {
+        case status, offers, progress
+        case totalResults = "total_results"
+        case cheapestPrice = "cheapest_price"
+    }
 }
 
-struct LetsFGDestinationResult: Decodable {
-    let destination: String
-    let offers: [LetsFGFlightOffer]
+struct LetsFGSearchProgress: Decodable {
+    let checked: Int?
+    let total: Int?
+    let found: Int?
 }
 
-struct LetsFGSingleSearchResponse: Decodable {
-    let results: [LetsFGFlightOffer]
-}
-
-struct LetsFGFlightOffer: Decodable {
+struct LetsFGAgentOffer: Decodable {
+    let id: String
     let price: Double
     let currency: String
-    let outbound: LetsFGItinerary
-    let conditions: LetsFGConditions?
-    let bookingUrl: String
+    let airline: String?
+    let airlineCode: String?
+    let origin: String
+    let destination: String
+    let departureTime: String
+    let arrivalTime: String
+    let durationMinutes: Int
+    let stops: Int
+    let googleFlightsPrice: Double?
+    let segments: [LetsFGAgentSegment]?
 
     enum CodingKeys: String, CodingKey {
-        case price, currency, outbound, conditions
-        case bookingUrl = "booking_url"
+        case id, price, currency, airline, origin, destination, stops, segments
+        case airlineCode = "airline_code"
+        case departureTime = "departure_time"
+        case arrivalTime = "arrival_time"
+        case durationMinutes = "duration_minutes"
+        case googleFlightsPrice = "google_flights_price"
     }
 }
 
-struct LetsFGItinerary: Decodable {
-    let routeStr: String
-    let totalDurationSeconds: Int
-    let stopovers: [LetsFGStopover]
-    let departureAt: String   // ISO 8601
-    let arrivalAt: String     // ISO 8601
-    let carrier: String
+struct LetsFGAgentSegment: Decodable {
+    let airline: String?
+    let airlineCode: String?
+    let origin: String?
+    let destination: String?
+    let departureTime: String?
+    let arrivalTime: String?
+    let durationMinutes: Int?
 
     enum CodingKeys: String, CodingKey {
-        case routeStr = "route_str"
-        case totalDurationSeconds = "total_duration_seconds"
-        case stopovers, carrier
-        case departureAt = "departure_at"
-        case arrivalAt = "arrival_at"
+        case airline, origin, destination
+        case airlineCode = "airline_code"
+        case departureTime = "departure_time"
+        case arrivalTime = "arrival_time"
+        case durationMinutes = "duration_minutes"
     }
 }
 
-struct LetsFGStopover: Decodable {
-    let airportCode: String
-    let cityName: String
-    let layoverSeconds: Int
+struct LetsFGErrorResponse: Decodable {
+    let error: String
+    let code: String?
+    let retryAfterSeconds: Int?
 
     enum CodingKeys: String, CodingKey {
-        case airportCode = "airport_code"
-        case cityName = "city_name"
-        case layoverSeconds = "layover_seconds"
+        case error, code
+        case retryAfterSeconds = "retry_after_seconds"
     }
-}
-
-struct LetsFGConditions: Decodable {
-    let refundable: Bool?
-    let changeable: Bool?
 }

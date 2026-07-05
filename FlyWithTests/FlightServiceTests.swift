@@ -1,7 +1,7 @@
 import XCTest
 @testable import FlyWith
 
-// MARK: - Group 1: worthItScore (pure computation, no mocking)
+// MARK: - Group 1: worthItScore
 
 final class WorthItScoreTests: XCTestCase {
 
@@ -14,7 +14,7 @@ final class WorthItScoreTests: XCTestCase {
         StopoverRecommendation(
             stopoverCity: StopoverCity(
                 iataCode: "TST", cityName: "Test City", countryName: "Testland",
-                emoji: "🧪", visaFreeCountries: [],
+                emoji: "T", visaFreeCountries: [],
                 scores: scores,
                 highlights: [], estimatedHotelPerNight: 100,
                 averageTemperature: 20, visaSummary: "",
@@ -68,40 +68,39 @@ final class WorthItScoreTests: XCTestCase {
     }
 
     func testFareComponentCapsAt30() {
-        // fareComponent = max(0, min(30, (1072 - 772 + 300)/20)) = min(30, 30) = 30
-        // with zero comfort and zero stopover days, score == 30
         let scores = StopoverScores(family: 0, seniors: 0, budget: 0, explorer: 0, overall: 0)
         let rec = makeRec(totalPrice: 772, directPrice: 1072, stopoverDays: 0, scores: scores)
         XCTAssertEqual(rec.worthItScore, 30)
     }
 }
 
-// MARK: - Group 2: LetsFG response → StopoverRecommendation mapping
+// MARK: - Group 2: LetsFG agent offer mapping
 
 final class LetsFGMappingTests: XCTestCase {
 
     private func makeOffer(
         price: Double,
-        departureISO: String = "2026-09-15T21:00:00Z",
-        arrivalISO: String = "2026-09-16T13:00:00Z",
+        departureTime: String = "2026-09-15T21:00:00",
+        arrivalTime: String = "2026-09-16T13:00:00",
         carrier: String = "EK",
-        durationSec: Int = 57600,
-        stopovers: [LetsFGStopover] = [],
-        bookingUrl: String = "https://letsfg.co/book/abc"
-    ) -> LetsFGFlightOffer {
-        LetsFGFlightOffer(
+        durationMinutes: Int = 960,
+        segments: [LetsFGAgentSegment]? = nil,
+        googleFlightsPrice: Double? = nil
+    ) -> LetsFGAgentOffer {
+        LetsFGAgentOffer(
+            id: "ws_off_test",
             price: price,
             currency: "CAD",
-            outbound: LetsFGItinerary(
-                routeStr: "YYZ-DXB",
-                totalDurationSeconds: durationSec,
-                stopovers: stopovers,
-                departureAt: departureISO,
-                arrivalAt: arrivalISO,
-                carrier: carrier
-            ),
-            conditions: nil,
-            bookingUrl: bookingUrl
+            airline: carrier,
+            airlineCode: carrier,
+            origin: "YYZ",
+            destination: "DXB",
+            departureTime: departureTime,
+            arrivalTime: arrivalTime,
+            durationMinutes: durationMinutes,
+            stops: segments?.count ?? 0,
+            googleFlightsPrice: googleFlightsPrice,
+            segments: segments
         )
     }
 
@@ -113,47 +112,65 @@ final class LetsFGMappingTests: XCTestCase {
             query: FlightSearch(),
             stopover: city,
             leg1: makeOffer(price: 926),
-            leg2: makeOffer(price: 277)
+            leg2: makeOffer(price: 277),
+            directComparisonPrice: 1203
         )
         XCTAssertEqual(rec.totalPrice, 1203, accuracy: 0.01)
         XCTAssertEqual(rec.leg1.price, 926, accuracy: 0.01)
         XCTAssertEqual(rec.leg2.price, 277, accuracy: 0.01)
     }
 
-    func testDurationConvertsFromSeconds() {
+    func testDirectComparisonUsesFetchedBaseline() {
         let rec = service.buildLetsFGRecommendation(
             query: FlightSearch(),
             stopover: city,
-            leg1: makeOffer(price: 500, durationSec: 57600),  // 960 min
-            leg2: makeOffer(price: 200, durationSec: 12600)   // 210 min
+            leg1: makeOffer(price: 500),
+            leg2: makeOffer(price: 300),
+            directComparisonPrice: 950
+        )
+        XCTAssertEqual(rec.directComparisonPrice, 950, accuracy: 0.01)
+        XCTAssertEqual(rec.savings, 150, accuracy: 0.01)
+    }
+
+    func testDurationMapsFromAgentOffer() {
+        let rec = service.buildLetsFGRecommendation(
+            query: FlightSearch(),
+            stopover: city,
+            leg1: makeOffer(price: 500, durationMinutes: 960),
+            leg2: makeOffer(price: 200, durationMinutes: 210),
+            directComparisonPrice: 700
         )
         XCTAssertEqual(rec.leg1.durationMinutes, 960)
         XCTAssertEqual(rec.leg2.durationMinutes, 210)
     }
 
-    func testStopoversMappedToFlightStops() {
-        let lhr = LetsFGStopover(airportCode: "LHR", cityName: "London", layoverSeconds: 5400)
-        let leg1 = makeOffer(price: 900, stopovers: [lhr])
+    func testSegmentsMapToFlightStops() {
+        let leg1 = makeOffer(
+            price: 900,
+            segments: [
+                LetsFGAgentSegment(
+                    airline: "BA", airlineCode: "BA",
+                    origin: "YYZ", destination: "LHR",
+                    departureTime: nil, arrivalTime: nil,
+                    durationMinutes: nil
+                ),
+                LetsFGAgentSegment(
+                    airline: "BA", airlineCode: "BA",
+                    origin: "LHR", destination: "DXB",
+                    departureTime: nil, arrivalTime: nil,
+                    durationMinutes: nil
+                )
+            ]
+        )
         let rec = service.buildLetsFGRecommendation(
             query: FlightSearch(),
             stopover: city,
             leg1: leg1,
-            leg2: makeOffer(price: 300)
+            leg2: makeOffer(price: 300),
+            directComparisonPrice: 1200
         )
         XCTAssertEqual(rec.leg1.stops.count, 1)
         XCTAssertEqual(rec.leg1.stops.first?.airportCode, "LHR")
-        XCTAssertEqual(rec.leg1.stops.first?.layoverMinutes, 90)  // 5400s / 60
-    }
-
-    func testBookingURLPropagates() {
-        let url = "https://letsfg.co/book/test999"
-        let rec = service.buildLetsFGRecommendation(
-            query: FlightSearch(),
-            stopover: city,
-            leg1: makeOffer(price: 500),
-            leg2: makeOffer(price: 300, bookingUrl: url)
-        )
-        XCTAssertEqual(rec.leg2.bookingURL, url)
     }
 
     func testCarrierMappedToAirline() {
@@ -161,7 +178,8 @@ final class LetsFGMappingTests: XCTestCase {
             query: FlightSearch(),
             stopover: city,
             leg1: makeOffer(price: 500, carrier: "QR"),
-            leg2: makeOffer(price: 300, carrier: "TK")
+            leg2: makeOffer(price: 300, carrier: "TK"),
+            directComparisonPrice: 800
         )
         XCTAssertEqual(rec.leg1.airline, "QR")
         XCTAssertEqual(rec.leg2.airline, "TK")
@@ -173,7 +191,6 @@ final class LetsFGMappingTests: XCTestCase {
 final class MockFallbackTests: XCTestCase {
 
     func testUseMockDataWhenNoKeySet() {
-        // In the test environment both env vars are absent by default
         if ProcessInfo.processInfo.environment["LETSFG_API_KEY"] == nil &&
            ProcessInfo.processInfo.environment["KIWI_API_KEY"] == nil {
             XCTAssertTrue(FlightService().useMockData)
@@ -207,109 +224,102 @@ final class MockFallbackTests: XCTestCase {
     }
 }
 
-// MARK: - Group 4: JSON decoding of LetsFG model structs
+// MARK: - Group 4: LetsFG agent JSON decoding
 
 final class LetsFGDecodingTests: XCTestCase {
 
-    func testDecodeMultiSearchResponse() throws {
-        let json = """
-        {
-          "results": [
-            {
-              "destination": "DXB",
-              "offers": [
-                {
-                  "price": 926.50,
-                  "currency": "CAD",
-                  "booking_url": "https://letsfg.co/book/abc",
-                  "outbound": {
-                    "route_str": "YYZ-DXB",
-                    "total_duration_seconds": 57600,
-                    "stopovers": [],
-                    "departure_at": "2026-09-15T21:00:00Z",
-                    "arrival_at": "2026-09-16T13:00:00Z",
-                    "carrier": "EK"
-                  }
-                }
-              ]
-            }
-          ]
-        }
-        """.data(using: .utf8)!
-
-        let response = try JSONDecoder().decode(LetsFGMultiSearchResponse.self, from: json)
-        XCTAssertEqual(response.results.count, 1)
-        XCTAssertEqual(response.results[0].destination, "DXB")
-        XCTAssertEqual(response.results[0].offers[0].price, 926.50, accuracy: 0.01)
-        XCTAssertEqual(response.results[0].offers[0].outbound.carrier, "EK")
-        XCTAssertEqual(response.results[0].offers[0].outbound.totalDurationSeconds, 57600)
+    func testEncodeStructuredSearchRequest() throws {
+        let request = LetsFGAgentSearchRequest(origin: "LHR", destination: "BCN", dateFrom: "2026-08-15")
+        let data = try JSONEncoder().encode(request)
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: String]
+        XCTAssertEqual(object?["origin"], "LHR")
+        XCTAssertEqual(object?["destination"], "BCN")
+        XCTAssertEqual(object?["date_from"], "2026-08-15")
     }
 
-    func testDecodeStopoverSnakeCaseKeys() throws {
-        let json = """
-        {
-          "airport_code": "LHR",
-          "city_name": "London",
-          "layover_seconds": 5400
-        }
-        """.data(using: .utf8)!
-
-        let stopover = try JSONDecoder().decode(LetsFGStopover.self, from: json)
-        XCTAssertEqual(stopover.airportCode, "LHR")
-        XCTAssertEqual(stopover.cityName, "London")
-        XCTAssertEqual(stopover.layoverSeconds, 5400)
+    func testEncodeQuerySearchRequest() throws {
+        let request = LetsFGAgentQuerySearchRequest(query: "London to Barcelona August 15 2026")
+        let data = try JSONEncoder().encode(request)
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: String]
+        XCTAssertEqual(object?["query"], "London to Barcelona August 15 2026")
     }
 
-    func testDecodeSingleSearchResponse() throws {
+    func testDecodeSearchStartResponse() throws {
         let json = """
         {
-          "results": [
-            {
-              "price": 277.00,
-              "currency": "CAD",
-              "booking_url": "https://letsfg.co/book/xyz",
-              "outbound": {
-                "route_str": "DXB-BOM",
-                "total_duration_seconds": 12600,
-                "stopovers": [],
-                "departure_at": "2026-09-20T23:40:00Z",
-                "arrival_at": "2026-09-21T03:10:00Z",
-                "carrier": "EK"
-              }
-            }
-          ]
-        }
-        """.data(using: .utf8)!
-
-        let response = try JSONDecoder().decode(LetsFGSingleSearchResponse.self, from: json)
-        let offer = try XCTUnwrap(response.results.first)
-        XCTAssertEqual(offer.price, 277.00, accuracy: 0.01)
-        XCTAssertEqual(offer.outbound.routeStr, "DXB-BOM")
-    }
-
-    func testDecodeOfferWithConditions() throws {
-        let json = """
-        {
-          "price": 500.00,
-          "currency": "CAD",
-          "booking_url": "https://letsfg.co/book/cond",
-          "outbound": {
-            "route_str": "YYZ-IST",
-            "total_duration_seconds": 43200,
-            "stopovers": [],
-            "departure_at": "2026-09-15T08:00:00Z",
-            "arrival_at": "2026-09-16T02:00:00Z",
-            "carrier": "TK"
-          },
-          "conditions": {
-            "refundable": true,
-            "changeable": false
+          "search_id": "ws_abc123",
+          "status": "searching",
+          "parsed": {
+            "origin": "LHR",
+            "destination": "BCN"
           }
         }
         """.data(using: .utf8)!
 
-        let offer = try JSONDecoder().decode(LetsFGFlightOffer.self, from: json)
-        XCTAssertEqual(offer.conditions?.refundable, true)
-        XCTAssertEqual(offer.conditions?.changeable, false)
+        let response = try JSONDecoder().decode(LetsFGSearchStartResponse.self, from: json)
+        XCTAssertEqual(response.searchId, "ws_abc123")
+        XCTAssertEqual(response.status, "searching")
+    }
+
+    func testDecodeClarificationResponse() throws {
+        let json = """
+        {
+          "status": "needs_clarification",
+          "needs_clarification": true,
+          "follow_up_questions": ["Which London airport?"]
+        }
+        """.data(using: .utf8)!
+
+        let response = try JSONDecoder().decode(LetsFGSearchStartResponse.self, from: json)
+        XCTAssertEqual(response.needsClarification, true)
+        XCTAssertEqual(response.followUpQuestions?.first, "Which London airport?")
+    }
+
+    func testDecodeCompletedResultsWithGoogleFlightsPrice() throws {
+        let json = """
+        {
+          "status": "completed",
+          "total_results": 1,
+          "cheapest_price": 89.50,
+          "offers": [
+            {
+              "id": "ws_off_abc123",
+              "price": 89.50,
+              "currency": "EUR",
+              "airline": "Ryanair",
+              "airline_code": "FR",
+              "origin": "STN",
+              "destination": "BCN",
+              "departure_time": "2026-06-15T06:25:00",
+              "arrival_time": "2026-06-15T09:30:00",
+              "duration_minutes": 125,
+              "stops": 0,
+              "google_flights_price": 109.00,
+              "segments": []
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+
+        let response = try JSONDecoder().decode(LetsFGSearchResultsResponse.self, from: json)
+        let offer = try XCTUnwrap(response.offers?.first)
+        XCTAssertEqual(response.status, "completed")
+        XCTAssertEqual(offer.price, 89.50, accuracy: 0.01)
+        XCTAssertEqual(offer.googleFlightsPrice, 109.00, accuracy: 0.01)
+        XCTAssertEqual(offer.durationMinutes, 125)
+    }
+
+    func testDecodeRateLimitError() throws {
+        let json = """
+        {
+          "error": "Agent rate limited (search limit).",
+          "code": "AGENT_RATE_LIMITED",
+          "retry_after_seconds": 393
+        }
+        """.data(using: .utf8)!
+
+        let response = try JSONDecoder().decode(LetsFGErrorResponse.self, from: json)
+        XCTAssertEqual(response.code, "AGENT_RATE_LIMITED")
+        XCTAssertEqual(response.retryAfterSeconds, 393)
     }
 }

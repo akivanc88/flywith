@@ -35,11 +35,22 @@ struct RecommendationsView: View {
                 .padding()
                 .background(Color(.systemGroupedBackground))
 
-                DirectFlightBanner().padding()
+                FareEvidenceBanner(
+                    sourceName: service.fareSourceName,
+                    note: service.fareEvidenceNote,
+                    directComparisonPrice: service.recommendations.first?.directComparisonPrice
+                )
+                .padding()
 
                 LazyVStack(spacing: 16) {
                     ForEach(service.recommendations) { rec in
-                        NavigationLink(destination: RecommendationDetailView(recommendation: rec)) {
+                        NavigationLink(
+                            destination: RecommendationDetailView(
+                                recommendation: rec,
+                                fareSourceName: service.fareSourceName,
+                                fareEvidenceNote: service.fareEvidenceNote
+                            )
+                        ) {
                             RecommendationCard(recommendation: rec, criteria: search.criteria)
                         }
                         .buttonStyle(.plain)
@@ -196,16 +207,20 @@ struct LegSummary: View {
     }
 }
 
-// MARK: - Direct Flight Banner
+// MARK: - Fare Evidence Banner
 
-struct DirectFlightBanner: View {
+struct FareEvidenceBanner: View {
+    let sourceName: String
+    let note: String
+    let directComparisonPrice: Double?
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "info.circle.fill").foregroundStyle(FWColor.brandHighlight)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Direct comparison: ~CAD $1,072")
+                Text("\(sourceName): direct baseline \(directPriceText)")
                     .font(.subheadline).fontWeight(.semibold)
-                Text("FlyWith compares the fare against hotel cost, airport comfort, visa friction, and travel fatigue.")
+                Text(note)
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -213,6 +228,11 @@ struct DirectFlightBanner: View {
         .background(FWColor.surfaceGoldSoft)
         .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: FWRadius.lg).stroke(FWColor.brandHighlight.opacity(0.35)))
+    }
+
+    private var directPriceText: String {
+        guard let directComparisonPrice else { return "not available" }
+        return "CAD \(Int(directComparisonPrice))"
     }
 }
 
