@@ -27,6 +27,7 @@
       </a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#how">How it works</a>
+        <a href="#agents">Agents</a>
         <a href="#demo">Demo</a>
         <a href="#profiles">Profiles</a>
         <a href="#cities">Stopovers</a>
@@ -41,6 +42,7 @@
     </div>
     <div class="nav-menu-mobile" id="mobile-menu">
       <a href="#how">How it works</a>
+      <a href="#agents">Agents</a>
       <a href="#demo">Demo</a>
       <a href="#profiles">Profiles</a>
       <a href="#cities">Stopovers</a>
@@ -176,6 +178,37 @@
             <p>FlyWith doesn't sell tickets. It explains the recommendation and hands off to Kiwi, Google Flights, Skyscanner or the airline.</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== AGENTS ===== -->
+    <section class="section" id="agents">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">Under the hood</span>
+          <h2 class="section-title">Watch the agents decide</h2>
+          <p class="section-sub" style="margin-left:auto;margin-right:auto;">Every verdict comes from a team of AI agents: an orchestrator delegates to flight-search, value and logistics specialists in parallel — and a verifier audits every claim against the raw evidence before anything reaches you.</p>
+        </div>
+        <div class="at-shell reveal">
+          <div class="at-toolbar">
+            <span class="at-dot" aria-hidden="true"></span><span class="at-dot" aria-hidden="true"></span><span class="at-dot" aria-hidden="true"></span>
+            <span class="at-status" id="agent-status">recorded run · June 2026 fares</span>
+            <button class="at-run" id="agent-run" type="button">▶ Replay the run</button>
+          </div>
+          <div class="at-prompt" id="agent-prompt-wrap" hidden>
+            <input id="agent-prompt" type="text" aria-label="Trip request for the live agent"
+              value="Toronto to Mumbai in November, 2 adults + 2 kids + grandma, Canadian passports. Is a stopover worth it?" />
+          </div>
+          <div class="at-panes">
+            <div class="at-feed" id="agent-feed" aria-live="polite">
+              <noscript><p class="at-dim">Enable JavaScript to watch the agent trace — or read the architecture in <a href="https://github.com/akivanc88/flywith/tree/main/agent">agent/README.md</a>.</p></noscript>
+            </div>
+            <aside class="at-verdict" id="agent-verdict" aria-live="polite">
+              <p class="at-dim at-waiting">The verdict appears only after the verifier subagent approves it.</p>
+            </aside>
+          </div>
+        </div>
+        <p class="at-footnote reveal">This is a recording of a real run. Run it live against your own key: <code>cd agent && npm run dev</code> — architecture &amp; design rationale in <a href="https://github.com/akivanc88/flywith/tree/main/agent">agent/README.md</a>.</p>
       </div>
     </section>
 
@@ -568,5 +601,6 @@
   <script defer src="assets/js/main.js"></script>
   <script defer src="assets/js/globe-land.js"></script>
   <script defer src="assets/js/globe.js"></script>
+  <script defer src="assets/js/agent-trace.js"></script>
 </body>
 </html>
