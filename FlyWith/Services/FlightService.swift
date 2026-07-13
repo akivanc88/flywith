@@ -13,8 +13,25 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
 
     // MARK: - Backend selection
 
-    private let letsfgAPIKey: String = ProcessInfo.processInfo.environment["LETSFG_API_KEY"] ?? ""
-    private let kiwiAPIKey: String   = ProcessInfo.processInfo.environment["KIWI_API_KEY"] ?? ""
+    private let letsfgAPIKey: String
+    private let kiwiAPIKey: String
+    private let urlSession: URLSession
+    private let pollingQueue: DispatchQueue
+    private let pollingInterval: DispatchQueue.SchedulerTimeType.Stride
+
+    init(
+        letsfgAPIKey: String = ProcessInfo.processInfo.environment["LETSFG_API_KEY"] ?? "",
+        kiwiAPIKey: String = ProcessInfo.processInfo.environment["KIWI_API_KEY"] ?? "",
+        urlSession: URLSession = .shared,
+        pollingQueue: DispatchQueue = .global(),
+        pollingInterval: DispatchQueue.SchedulerTimeType.Stride = .seconds(10)
+    ) {
+        self.letsfgAPIKey = letsfgAPIKey
+        self.kiwiAPIKey = kiwiAPIKey
+        self.urlSession = urlSession
+        self.pollingQueue = pollingQueue
+        self.pollingInterval = pollingInterval
+    }
 
     private enum SearchBackend { case letsfg, kiwi, mock }
     private var activeBackend: SearchBackend {
@@ -97,37 +114,38 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             byAdding: .day, value: query.minStopoverDays, to: query.departureDate
         ) ?? query.departureDate)
 
-        fetchLetsFGOffer(origin: query.origin, destination: query.destination, date: isoDate, query: query)
-            .flatMap { [weak self] directOffer -> AnyPublisher<[StopoverRecommendation?], Error> in
-                guard let self else { return Fail(error: URLError(.cancelled)).eraseToAnyPublisher() }
-                let stopoverPublishers = cities.map { city -> AnyPublisher<StopoverRecommendation?, Error> in
-                    let leg1 = self.fetchLetsFGOffer(origin: query.origin, destination: city.iataCode, date: isoDate, query: query)
-                    let leg2 = self.fetchLetsFGOffer(origin: city.iataCode, destination: query.destination, date: leg2Date, query: query)
+        guard let city = cities.first else {
+            errorMessage = "No eligible stopover city was found."
+            isLoading = false
+            return
+        }
 
-                    return Publishers.Zip(leg1, leg2)
-                        .map { leg1Offer, leg2Offer -> StopoverRecommendation? in
-                            guard let leg1Offer, let leg2Offer else { return nil }
-                            let stopoverTotal = leg1Offer.price + leg2Offer.price
-                            let comparisonPrice = directOffer?.googleFlightsPrice ?? directOffer?.price ?? stopoverTotal
-                            return self.buildLetsFGRecommendation(
-                                query: query,
-                                stopover: city,
-                                leg1: leg1Offer,
-                                leg2: leg2Offer,
-                                directComparisonPrice: comparisonPrice
-                            )
-                        }
-                        .eraseToAnyPublisher()
-                }
-                return Publishers.MergeMany(stopoverPublishers)
-                    .collect()
-                    .eraseToAnyPublisher()
+        // Subscribe to all three cold publishers together so no request waits for
+        // the direct baseline to finish before it starts.
+        let direct = fetchLetsFGOffer(origin: query.origin, destination: query.destination, date: isoDate, query: query)
+            .catch { _ in Just<LetsFGAgentOffer?>(nil).setFailureType(to: Error.self) }
+            .eraseToAnyPublisher()
+        let leg1 = fetchLetsFGOffer(origin: query.origin, destination: city.iataCode, date: isoDate, query: query)
+        let leg2 = fetchLetsFGOffer(origin: city.iataCode, destination: query.destination, date: leg2Date, query: query)
+        Publishers.Zip3(direct, leg1, leg2)
+            .map { [weak self] directOffer, leg1Offer, leg2Offer -> [StopoverRecommendation?] in
+                guard let self, let leg1Offer, let leg2Offer else { return [nil] }
+                let stopoverTotal = leg1Offer.price + leg2Offer.price
+                let comparisonPrice = directOffer?.googleFlightsPrice ?? directOffer?.price ?? stopoverTotal
+                return [self.buildLetsFGRecommendation(query: query, stopover: city, leg1: leg1Offer,
+                                                       leg2: leg2Offer, directComparisonPrice: comparisonPrice)]
             }
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        self?.errorMessage = "LetsFG search failed: \(error.localizedDescription)"
+                        if (error as? URLError)?.code == .cancelled {
+                            self?.errorMessage = "LetsFG search was cancelled."
+                        } else if error is DecodingError {
+                            self?.errorMessage = "LetsFG returned an unexpected response. Please try again later."
+                        } else {
+                            self?.errorMessage = "LetsFG search failed: \(error.localizedDescription)"
+                        }
                         self?.isLoading = false
                     }
                 },
@@ -197,13 +215,14 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             airline: offer.airlineCode ?? offer.airline ?? "",
             price: offer.price,
             currency: offer.currency,
-            bookingURL: "https://letsfg.co",
+            bookingURL: usableBookingURL(offer.bookingURL),
+            bookingSource: .letsfg,
             stops: (offer.segments ?? []).dropLast().compactMap { segment in
                 guard let airportCode = segment.destination else { return nil }
                 return FlightStop(
                     airportCode: airportCode,
                     cityName: segment.destination ?? airportCode,
-                    layoverMinutes: 0
+                    layoverMinutes: layoverMinutes(after: segment, in: offer.segments ?? [])
                 )
             }
         )
@@ -215,25 +234,38 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         date: String,
         query: FlightSearch
     ) -> AnyPublisher<LetsFGAgentOffer?, Error> {
-        let request = LetsFGAgentSearchRequest(
-            origin: origin,
-            destination: destination,
-            dateFrom: date
-        )
+        let request = makeLetsFGSearchRequest(origin: origin, destination: destination, date: date, query: query)
 
         return letsfgPostPublisher(endpoint: "/api/search", body: request, responseType: LetsFGSearchStartResponse.self)
             .flatMap { [weak self] start -> AnyPublisher<LetsFGAgentOffer?, Error> in
                 guard let self else { return Fail(error: URLError(.cancelled)).eraseToAnyPublisher() }
-                if start.needsClarification == true {
-                    let question = start.followUpQuestions?.first ?? "LetsFG needs more search details."
-                    return Fail(error: LetsFGAPIError.clarificationNeeded(question)).eraseToAnyPublisher()
-                }
-                guard let searchId = start.searchId else {
-                    return Fail(error: LetsFGAPIError.missingSearchId).eraseToAnyPublisher()
-                }
-                return self.pollLetsFGResults(searchId: searchId, attemptsRemaining: 18)
+                return self.handleLetsFGSearchStart(start)
             }
             .eraseToAnyPublisher()
+    }
+
+    func makeLetsFGSearchRequest(origin: String, destination: String, date: String, query: FlightSearch) -> LetsFGAgentSearchRequest {
+        LetsFGAgentSearchRequest(
+            origin: origin,
+            destination: destination,
+            dateFrom: date,
+            adults: max(1, query.adultCount),
+            children: max(0, query.childCount),
+            infants: max(0, query.infantCount),
+            currency: "CAD",
+            limit: min(50, max(1, query.resultLimit))
+        )
+    }
+
+    private func handleLetsFGSearchStart(_ start: LetsFGSearchStartResponse) -> AnyPublisher<LetsFGAgentOffer?, Error> {
+        if start.needsClarification == true {
+            let question = start.followUpQuestions?.first ?? "LetsFG needs more search details."
+            return Fail(error: LetsFGAPIError.clarificationNeeded(question)).eraseToAnyPublisher()
+        }
+        guard let searchId = start.searchId else {
+            return Fail(error: LetsFGAPIError.missingSearchId).eraseToAnyPublisher()
+        }
+        return pollLetsFGResults(searchId: searchId, attemptsRemaining: 18)
     }
 
     private func pollLetsFGResults(searchId: String, attemptsRemaining: Int) -> AnyPublisher<LetsFGAgentOffer?, Error> {
@@ -251,7 +283,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
                         return Fail(error: LetsFGAPIError.pollingTimedOut).eraseToAnyPublisher()
                     }
                     return Just(())
-                        .delay(for: .seconds(10), scheduler: DispatchQueue.global())
+                        .delay(for: self.pollingInterval, scheduler: self.pollingQueue)
                         .setFailureType(to: Error.self)
                         .flatMap { self.pollLetsFGResults(searchId: searchId, attemptsRemaining: attemptsRemaining - 1) }
                         .eraseToAnyPublisher()
@@ -273,7 +305,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         req.setValue(letsfgAuthorizationHeader, forHTTPHeaderField: "Authorization")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try? JSONEncoder().encode(body)
-        return URLSession.shared.dataTaskPublisher(for: req)
+        return urlSession.dataTaskPublisher(for: req)
             .tryMap { data, response -> Data in
                 guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
                 guard (200..<300).contains(http.statusCode) else {
@@ -295,7 +327,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         req.setValue(letsfgAuthorizationHeader, forHTTPHeaderField: "Authorization")
-        return URLSession.shared.dataTaskPublisher(for: req)
+        return urlSession.dataTaskPublisher(for: req)
             .tryMap { data, response -> Data in
                 guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
                 guard (200..<300).contains(http.statusCode) else {
@@ -322,6 +354,39 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         fmt.locale = Locale(identifier: "en_US_POSIX")
         fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         return fmt.date(from: rawValue) ?? Date()
+    }
+
+    private func usableBookingURL(_ rawValue: String?) -> String? {
+        guard let rawValue,
+              let url = URL(string: rawValue),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "https" || scheme == "http",
+              url.host != nil else { return nil }
+        return rawValue
+    }
+
+    private func layoverMinutes(after segment: LetsFGAgentSegment, in segments: [LetsFGAgentSegment]) -> Int? {
+        guard let index = segments.firstIndex(where: {
+            $0.origin == segment.origin && $0.destination == segment.destination &&
+            $0.departureTime == segment.departureTime && $0.arrivalTime == segment.arrivalTime
+        }),
+        segments.indices.contains(index + 1),
+        let arrivalRaw = segment.arrivalTime,
+        let nextDepartureRaw = segments[index + 1].departureTime else { return nil }
+
+        let arrival = parseOptionalLetsFGDate(arrivalRaw)
+        let departure = parseOptionalLetsFGDate(nextDepartureRaw)
+        guard let arrival, let departure else { return nil }
+        let minutes = Int(departure.timeIntervalSince(arrival) / 60)
+        return minutes >= 0 ? minutes : nil
+    }
+
+    private func parseOptionalLetsFGDate(_ rawValue: String) -> Date? {
+        if let date = FlightService.iso8601.date(from: rawValue) { return date }
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return fmt.date(from: rawValue)
     }
 
     private static func letsfgError(statusCode: Int, data: Data) -> Error {
@@ -477,6 +542,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
                 airline: leg1.airlines.first ?? "",
                 price: leg1.price, currency: "CAD",
                 bookingURL: leg1.deep_link,
+                bookingSource: .kiwi,
                 stops: leg1.route.dropLast().map {
                     FlightStop(airportCode: $0.flyTo, cityName: $0.cityTo, layoverMinutes: 0)
                 }
@@ -490,6 +556,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
                 airline: leg2.airlines.first ?? "",
                 price: leg2.price, currency: "CAD",
                 bookingURL: leg2.deep_link,
+                bookingSource: .kiwi,
                 stops: leg2.route.dropLast().map {
                     FlightStop(airportCode: $0.flyTo, cityName: $0.cityTo, layoverMinutes: 0)
                 }

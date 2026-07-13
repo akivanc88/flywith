@@ -37,7 +37,7 @@ final class WorthItScoreTests: XCTestCase {
             departureTime: Date(), arrivalTime: Date(),
             durationMinutes: 120, airline: "AC",
             price: price, currency: "CAD",
-            bookingURL: "https://letsfg.co", stops: []
+            bookingURL: "https://letsfg.co", bookingSource: .demo, stops: []
         )
     }
 
@@ -85,7 +85,8 @@ final class LetsFGMappingTests: XCTestCase {
         carrier: String = "EK",
         durationMinutes: Int = 960,
         segments: [LetsFGAgentSegment]? = nil,
-        googleFlightsPrice: Double? = nil
+        googleFlightsPrice: Double? = nil,
+        bookingURL: String? = nil
     ) -> LetsFGAgentOffer {
         LetsFGAgentOffer(
             id: "ws_off_test",
@@ -100,7 +101,8 @@ final class LetsFGMappingTests: XCTestCase {
             durationMinutes: durationMinutes,
             stops: segments?.count ?? 0,
             googleFlightsPrice: googleFlightsPrice,
-            segments: segments
+            segments: segments,
+            bookingURL: bookingURL
         )
     }
 
@@ -184,6 +186,46 @@ final class LetsFGMappingTests: XCTestCase {
         XCTAssertEqual(rec.leg1.airline, "QR")
         XCTAssertEqual(rec.leg2.airline, "TK")
     }
+
+    func testOfferSpecificBookingURLIsPreserved() {
+        let leg = service.mapLeg(offer: makeOffer(price: 500, bookingURL: "https://letsfg.co/offers/abc"),
+                                 origin: "YYZ", originCity: "Toronto", destination: "DXB", destinationCity: "Dubai")
+        XCTAssertEqual(leg.bookingURL, "https://letsfg.co/offers/abc")
+        XCTAssertEqual(leg.bookingSource, .letsfg)
+    }
+
+    func testMissingOrInvalidBookingURLDoesNotFabricateHomepageLink() {
+        let missing = service.mapLeg(offer: makeOffer(price: 500), origin: "YYZ", originCity: "Toronto",
+                                     destination: "DXB", destinationCity: "Dubai")
+        let invalid = service.mapLeg(offer: makeOffer(price: 500, bookingURL: "javascript:alert(1)"),
+                                     origin: "YYZ", originCity: "Toronto", destination: "DXB", destinationCity: "Dubai")
+        XCTAssertNil(missing.bookingURL)
+        XCTAssertNil(invalid.bookingURL)
+    }
+
+    func testLayoverIsComputedFromAdjacentSegments() {
+        let segments = [
+            LetsFGAgentSegment(airline: "BA", airlineCode: "BA", origin: "YYZ", destination: "LHR",
+                               departureTime: "2026-09-15T18:00:00Z", arrivalTime: "2026-09-16T06:00:00Z", durationMinutes: 420),
+            LetsFGAgentSegment(airline: "BA", airlineCode: "BA", origin: "LHR", destination: "DXB",
+                               departureTime: "2026-09-16T08:30:00Z", arrivalTime: "2026-09-16T18:00:00Z", durationMinutes: 420)
+        ]
+        let leg = service.mapLeg(offer: makeOffer(price: 500, segments: segments), origin: "YYZ", originCity: "Toronto",
+                                 destination: "DXB", destinationCity: "Dubai")
+        XCTAssertEqual(leg.stops.first?.layoverMinutes, 150)
+    }
+
+    func testUnknownAndContradictoryLayoversStayUnknown() {
+        let missingTimes = [
+            LetsFGAgentSegment(airline: nil, airlineCode: nil, origin: "YYZ", destination: "LHR",
+                               departureTime: nil, arrivalTime: nil, durationMinutes: nil),
+            LetsFGAgentSegment(airline: nil, airlineCode: nil, origin: "LHR", destination: "DXB",
+                               departureTime: nil, arrivalTime: nil, durationMinutes: nil)
+        ]
+        let leg = service.mapLeg(offer: makeOffer(price: 500, segments: missingTimes), origin: "YYZ", originCity: "Toronto",
+                                 destination: "DXB", destinationCity: "Dubai")
+        XCTAssertNil(leg.stops.first?.layoverMinutes)
+    }
 }
 
 // MARK: - Group 3: Mock data fallback
@@ -229,12 +271,31 @@ final class MockFallbackTests: XCTestCase {
 final class LetsFGDecodingTests: XCTestCase {
 
     func testEncodeStructuredSearchRequest() throws {
-        let request = LetsFGAgentSearchRequest(origin: "LHR", destination: "BCN", dateFrom: "2026-08-15")
+        let request = LetsFGAgentSearchRequest(origin: "LHR", destination: "BCN", dateFrom: "2026-08-15", adults: 2, children: 1, infants: 1, currency: "CAD", limit: 20)
         let data = try JSONEncoder().encode(request)
-        let object = try JSONSerialization.jsonObject(with: data) as? [String: String]
-        XCTAssertEqual(object?["origin"], "LHR")
-        XCTAssertEqual(object?["destination"], "BCN")
-        XCTAssertEqual(object?["date_from"], "2026-08-15")
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        XCTAssertEqual(object?["origin"] as? String, "LHR")
+        XCTAssertEqual(object?["destination"] as? String, "BCN")
+        XCTAssertEqual(object?["date_from"] as? String, "2026-08-15")
+        XCTAssertEqual(object?["adults"] as? Int, 2)
+        XCTAssertEqual(object?["children"] as? Int, 1)
+        XCTAssertEqual(object?["infants"] as? Int, 1)
+        XCTAssertEqual(object?["currency"] as? String, "CAD")
+        XCTAssertEqual(object?["limit"] as? Int, 20)
+    }
+
+    func testSearchRequestUsesPassengerCountsAndBoundsLimit() {
+        var query = FlightSearch()
+        query.adultCount = 3
+        query.childCount = 2
+        query.infantCount = 1
+        query.resultLimit = 500
+        let request = FlightService().makeLetsFGSearchRequest(origin: "YYZ", destination: "DXB", date: "2026-09-15", query: query)
+        XCTAssertEqual(request.adults, 3)
+        XCTAssertEqual(request.children, 2)
+        XCTAssertEqual(request.infants, 1)
+        XCTAssertEqual(request.currency, "CAD")
+        XCTAssertEqual(request.limit, 50)
     }
 
     func testEncodeQuerySearchRequest() throws {

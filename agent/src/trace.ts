@@ -1,33 +1,67 @@
-// Trace events streamed to clients over SSE. Every meaningful step of the
-// orchestration emits one, so a UI can render the agent system working live.
+export type DataStatus = "live" | "snapshot" | "estimated" | "editorial";
+
+export interface PlanRequest {
+  prompt: string;
+  origin?: string;
+  destination?: string;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  rooms?: number;
+  stopoverNights?: number;
+}
+
+export interface EvidenceEntry {
+  id: string;
+  agent: "flight-search" | "family-logistics" | "calculator";
+  tool: string;
+  input: Record<string, unknown>;
+  result: unknown;
+  dataStatus: DataStatus;
+  source: string;
+  observedAt: string;
+}
+
+export interface VerdictOption {
+  stopoverCity: string;
+  iata: string;
+  suggestedDays: number;
+  flightTotalCAD: number;
+  hotelEstimateCAD: number;
+  allInCAD: number;
+  deltaVsDirectCAD: number;
+  worthItScore: number;
+  visaVerdict: string;
+  highlight: string;
+  caution: string;
+  dataStatus: DataStatus;
+}
+
+export interface Verdict {
+  route: string;
+  summary: string;
+  directBaselineCAD: number;
+  options: VerdictOption[];
+  verifierNote: string;
+  dataStatus: DataStatus;
+}
+
+export interface RunResult {
+  runId: string;
+  verdict?: Verdict;
+  evidence: EvidenceEntry[];
+  modelCalls: number;
+  status: "completed" | "failed" | "cancelled";
+  error?: string;
+}
 
 export type TraceEvent =
-  | { type: "run.start"; prompt: string }
-  | { type: "orchestrator.thinking"; text: string }
-  | { type: "orchestrator.text"; text: string }
-  | { type: "subagent.start"; agent: SubagentName; task: string }
-  | { type: "subagent.tool"; agent: SubagentName; tool: string; input: unknown }
-  | { type: "subagent.tool_result"; agent: SubagentName; tool: string; summary: string }
-  | { type: "subagent.done"; agent: SubagentName; report: string }
-  | { type: "verdict"; verdict: unknown }
-  | { type: "run.done" }
-  | { type: "run.error"; message: string };
+  | { type: "run.start"; runId: string; message: string }
+  | { type: "stage.start"; stage: string; message: string }
+  | { type: "stage.done"; stage: string; message: string }
+  | { type: "verdict"; verdict: Verdict }
+  | { type: "run.error"; message: string }
+  | { type: "run.done"; status: RunResult["status"] };
 
-export type SubagentName =
-  | "flight-search"
-  | "stopover-value"
-  | "family-logistics"
-  | "verifier";
-
+export interface SequencedTraceEvent { sequence: number; event: TraceEvent }
 export type TraceEmitter = (event: TraceEvent) => void;
-
-// Evidence collected from tool calls during a run. The verifier subagent
-// audits the draft verdict against this log so nothing estimated gets
-// presented as verified data.
-export interface EvidenceEntry {
-  agent: SubagentName;
-  tool: string;
-  input: unknown;
-  result: unknown;
-  dataStatus: "verified" | "estimated" | "editorial";
-}

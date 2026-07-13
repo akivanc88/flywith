@@ -264,7 +264,9 @@ html.anim .globe-fallback .city-dot, html.anim .globe-fallback .city-label { opa
   padding: 3px 10px; border-radius: var(--radius-full, 9999px);
 }
 .at-badge.estimated { background: var(--surface-gold-soft, #fef7e7); color: var(--color-warning, #874810); }
-.at-badge.verified { background: var(--green-light, #ecfdf5); color: var(--color-success, #047857); }
+.at-badge.live { background: var(--green-light, #ecfdf5); color: var(--color-success, #047857); }
+.at-badge.snapshot { background: var(--surface-brand-soft, #ecfbfa); color: var(--color-brand-primary, #0c6b6e); }
+.at-badge.editorial { background: #f3f4f6; color: #4b5563; }
 .at-note { font-size: .8rem; padding-top: 4px; border-top: 1px dashed var(--border-subtle, #e3e8e7); }
 .at-footnote { text-align: center; font-size: .88rem; color: var(--text-muted, #64716f); margin-top: 22px; }
 .at-footnote code {

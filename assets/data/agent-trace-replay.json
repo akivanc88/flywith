@@ -1,9 +1,9 @@
 {
-  "note": "Recorded run of the FlyWith agent system (agent/ directory) against the June 2026 fare snapshot. Field `d` is the replay delay in ms before the event fires.",
+  "note": "Replay of the FlyWith agent system using a recorded June 2026 fare snapshot. It is historical demonstration data, not current live availability. Field `d` is the replay delay in ms before the event fires.",
   "prompt": "Toronto → Mumbai in November · 2 adults, 2 kids (4 & 7) + grandma · Canadian passports",
   "events": [
     { "d": 400, "type": "run.start", "prompt": "Toronto → Mumbai in November · 2 adults, 2 kids (4 & 7) + grandma · Canadian passports" },
-    { "d": 900, "type": "orchestrator.thinking", "text": "Family of five with young kids and a senior — fatigue matters as much as fare. I'll price the direct baseline and stopover leg pairs while logistics checks visas and accessibility. Those are independent, so both subagents run in parallel." },
+    { "d": 900, "type": "orchestrator.text", "text": "Searching the recorded fare snapshot and checking family logistics in parallel." },
     { "d": 700, "type": "subagent.start", "agent": "flight-search", "task": "Price YYZ→BOM direct baseline and stopover leg pairs via candidate cities for November." },
     { "d": 150, "type": "subagent.start", "agent": "family-logistics", "task": "Assess stopover candidates for Canadian passports, two young kids and a senior: visa friction, airport comfort, stroller/wheelchair reality." },
     { "d": 500, "type": "subagent.tool", "agent": "flight-search", "tool": "list_stopover_candidates", "input": {} },
@@ -70,7 +70,7 @@
           "dataStatus": "estimated"
         }
       ],
-      "verifierNote": "Fares verified against search results; hotel figures are estimates and every option is labeled accordingly."
+      "verifierNote": "Fares match the recorded June 2026 snapshot; hotel figures are estimates and every option is labeled accordingly."
     } },
     { "d": 500, "type": "run.done" }
   ]

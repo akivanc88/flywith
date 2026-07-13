@@ -56,25 +56,46 @@
     verdictPane.innerHTML = "";
     var head = document.createElement("div");
     head.className = "at-verdict-head";
-    head.innerHTML =
-      "<h3>" + v.route + "</h3>" +
-      "<p>" + v.summary + "</p>" +
-      "<p class='at-dim'>Direct baseline: " + money(v.directBaselineCAD) + " per seat</p>";
+    var title = document.createElement("h3");
+    title.textContent = v.route;
+    var summary = document.createElement("p");
+    summary.textContent = v.summary;
+    var baseline = document.createElement("p");
+    baseline.className = "at-dim";
+    baseline.textContent = "Direct baseline: " + money(v.directBaselineCAD) + " per seat";
+    head.append(title, summary, baseline);
     verdictPane.appendChild(head);
 
     (v.options || []).forEach(function (o, i) {
       var card = document.createElement("article");
       card.className = "at-card";
       card.style.animationDelay = (i * 120) + "ms";
-      card.innerHTML =
-        "<div class='at-card-top'><h4>" + o.stopoverCity + " · " + o.suggestedDays + " days</h4>" +
-        "<span class='at-score'>" + o.worthItScore + "</span></div>" +
-        "<p class='at-dim'>" + money(o.flightTotalCAD) + "/seat flights (+" + money(o.deltaVsDirectCAD) +
-        " vs direct) · hotel est. " + money(o.hotelEstimateCAD) + "</p>" +
-        "<p>✅ " + o.highlight + "</p>" +
-        "<p>⚠️ " + o.caution + "</p>" +
-        "<p class='at-dim'>🛂 " + o.visaVerdict + "</p>" +
-        "<span class='at-badge " + o.dataStatus + "'>" + o.dataStatus + "</span>";
+      var top = document.createElement("div");
+      top.className = "at-card-top";
+      var optionTitle = document.createElement("h4");
+      optionTitle.textContent = o.stopoverCity + " · " + o.suggestedDays + " days";
+      var score = document.createElement("span");
+      score.className = "at-score";
+      score.textContent = o.worthItScore;
+      top.append(optionTitle, score);
+      card.appendChild(top);
+
+      [
+        ["at-dim", money(o.flightTotalCAD) + "/seat flights (+" + money(o.deltaVsDirectCAD) + " vs direct) · hotel est. " + money(o.hotelEstimateCAD)],
+        ["", "✅ " + o.highlight],
+        ["", "⚠️ " + o.caution],
+        ["at-dim", "🛂 " + o.visaVerdict]
+      ].forEach(function (content) {
+        var paragraph = document.createElement("p");
+        paragraph.className = content[0];
+        paragraph.textContent = content[1];
+        card.appendChild(paragraph);
+      });
+      var badge = document.createElement("span");
+      var safeStatus = ["live", "snapshot", "estimated", "editorial"].indexOf(o.dataStatus) >= 0 ? o.dataStatus : "editorial";
+      badge.className = "at-badge " + safeStatus;
+      badge.textContent = safeStatus;
+      card.appendChild(badge);
       verdictPane.appendChild(card);
     });
 
@@ -89,7 +110,8 @@
   function handleEvent(e) {
     switch (e.type) {
       case "run.start": el("orch", "orchestrator", "Planning: " + e.prompt); setStatus("orchestrator planning…", true); break;
-      case "orchestrator.thinking": el("orch think", "orchestrator · thinking", e.text); break;
+      /* Older recordings may contain private reasoning events. Never render them. */
+      case "orchestrator.thinking": break;
       case "orchestrator.text": el("orch", "orchestrator", e.text); break;
       case "subagent.start": el("sub", (AGENT_LABEL[e.agent] || e.agent) + " · spawned", e.task); setStatus((e.agent) + " working…", true); break;
       case "subagent.tool": el("tool", (AGENT_LABEL[e.agent] || e.agent) + " → " + e.tool, JSON.stringify(e.input)); break;
@@ -97,7 +119,7 @@
       case "subagent.done": el("sub done", (AGENT_LABEL[e.agent] || e.agent) + " · report", e.report); break;
       case "verdict": renderVerdict(e.verdict); el("orch", "orchestrator", "Verdict published after verifier approval ✔"); setStatus("verdict published", false); break;
       case "run.error": el("err", "error", e.message); setStatus("error", false); break;
-      case "run.done": setStatus(agentOrigin ? "live run complete" : "replay complete — recorded run of the real agent backend", false); break;
+      case "run.done": setStatus(agentOrigin ? "live run complete" : "snapshot replay complete — observed June 2026", false); break;
     }
   }
 
@@ -145,16 +167,56 @@
     var promptInput = document.getElementById("agent-prompt");
     var prompt = (promptInput && promptInput.value) ||
       "Toronto to Mumbai in November, 2 adults + 2 kids + grandma, Canadian passports. Is a stopover worth it?";
-    var es = new EventSource(agentOrigin.replace(/\/$/, "") + "/api/plan?prompt=" + encodeURIComponent(prompt));
-    es.onmessage = function (msg) {
-      var e = JSON.parse(msg.data);
-      handleEvent(e);
-      if (e.type === "run.done") { es.close(); playing = false; runBtn.disabled = false; }
-    };
-    es.onerror = function () {
-      el("err", "connection", "Lost connection to the agent server at " + agentOrigin);
-      es.close(); playing = false; runBtn.disabled = false;
-    };
+    var origin = agentOrigin.replace(/\/$/, "");
+    var es;
+    var terminal = false;
+
+    function finishLive() {
+      playing = false;
+      runBtn.disabled = false;
+      if (es) es.close();
+    }
+
+    fetch(origin + "/api/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ prompt: prompt })
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("The agent server rejected the request (HTTP " + response.status + ").");
+        return response.json();
+      })
+      .then(function (run) {
+        if (!run || typeof run.runId !== "string" || typeof run.eventsUrl !== "string") {
+          throw new Error("The agent server returned an invalid run endpoint.");
+        }
+        var streamUrl = new URL(run.eventsUrl, origin + "/");
+        if (streamUrl.origin !== new URL(origin).origin) throw new Error("The agent server returned an unsafe run endpoint.");
+        setStatus("live run started…", true);
+        es = new EventSource(streamUrl.href);
+        es.onmessage = function (msg) {
+          var e;
+          try { e = JSON.parse(msg.data); }
+          catch (_) { return; }
+          handleEvent(e);
+          if (e.type === "run.done" || e.type === "run.error") {
+            terminal = true;
+            finishLive();
+          }
+        };
+        es.onerror = function () {
+          if (!terminal) {
+            el("err", "connection", "Lost connection to the agent server. The run may have been cancelled.");
+            setStatus("connection lost", false);
+          }
+          finishLive();
+        };
+      })
+      .catch(function (error) {
+        el("err", "connection", error && error.message ? error.message : "Could not start the live run.");
+        setStatus("could not start live run", false);
+        finishLive();
+      });
   }
 
   /* ---------- Wiring ---------- */

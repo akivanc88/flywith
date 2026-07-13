@@ -14,7 +14,7 @@ Google Flights shows you `Toronto → Mumbai from $849`. What it doesn't tell yo
 
 ## Live demo
 
-Prices fetched June 2026:
+Historical fare snapshot observed June 2026 (not current live availability):
 
 | Route | Cost | Bonus days |
 |---|---|---|
@@ -64,6 +64,13 @@ python3 -m http.server 8080
 ```
 
 Deploy to GitHub Pages — it's a single HTML file, no build step required.
+
+The agent trace shown by default is a historical snapshot replay. Add
+`?agent=http://localhost:8787` while running the agent server to create a fresh
+run with `POST /api/plan` and stream its curated progress events from the
+opaque `eventsUrl` returned by that request. The browser does not display model
+reasoning. Trace evidence uses four provenance states: `live`, `snapshot`,
+`estimated`, and `editorial`; a snapshot must never be presented as live data.
 
 ## Project structure
 

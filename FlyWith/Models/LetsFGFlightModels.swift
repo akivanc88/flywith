@@ -6,9 +6,14 @@ struct LetsFGAgentSearchRequest: Encodable {
     let origin: String
     let destination: String
     let dateFrom: String
+    let adults: Int
+    let children: Int
+    let infants: Int
+    let currency: String
+    let limit: Int
 
     enum CodingKeys: String, CodingKey {
-        case origin, destination
+        case origin, destination, adults, children, infants, currency, limit
         case dateFrom = "date_from"
     }
 }
@@ -67,6 +72,7 @@ struct LetsFGAgentOffer: Decodable {
     let stops: Int
     let googleFlightsPrice: Double?
     let segments: [LetsFGAgentSegment]?
+    let bookingURL: String?
 
     enum CodingKeys: String, CodingKey {
         case id, price, currency, airline, origin, destination, stops, segments
@@ -75,6 +81,7 @@ struct LetsFGAgentOffer: Decodable {
         case arrivalTime = "arrival_time"
         case durationMinutes = "duration_minutes"
         case googleFlightsPrice = "google_flights_price"
+        case bookingURL = "booking_url"
     }
 }
 
