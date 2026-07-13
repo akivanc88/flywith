@@ -57,6 +57,7 @@ extension FlightService {
                 price: prices.leg1,
                 currency: "CAD",
                 bookingURL: "https://kiwi.com",
+                bookingSource: .demo,
                 stops: mockStops(for: city.iataCode)
             ),
             leg2: FlightLeg(
@@ -71,6 +72,7 @@ extension FlightService {
                 price: prices.leg2,
                 currency: "CAD",
                 bookingURL: "https://kiwi.com",
+                bookingSource: .demo,
                 stops: []
             ),
             stopoverDays: query.minStopoverDays,

@@ -59,6 +59,7 @@ struct FlightSearch {
     var criteria: TravelerCriteria = .withKids
     var minStopoverDays: Int = 3
     var maxStopoverDays: Int = 7
+    var resultLimit: Int = 20
 
     var totalPassengers: Int { adultCount + childCount + infantCount }
 }
@@ -114,7 +115,8 @@ struct FlightLeg: Identifiable {
     let airline: String
     let price: Double           // CAD
     let currency: String
-    let bookingURL: String
+    let bookingURL: String?
+    let bookingSource: BookingSource
     let stops: [FlightStop]
 
     var durationFormatted: String {
@@ -124,11 +126,25 @@ struct FlightLeg: Identifiable {
     }
 }
 
+enum BookingSource: String {
+    case letsfg = "LetsFG"
+    case kiwi = "Kiwi"
+    case demo = "Demo fare"
+
+    var actionLabel: String {
+        switch self {
+        case .letsfg: return "Compare/book with LetsFG"
+        case .kiwi: return "Book on Kiwi"
+        case .demo: return "Demo fare — compare elsewhere"
+        }
+    }
+}
+
 struct FlightStop: Identifiable {
     let id = UUID()
     let airportCode: String
     let cityName: String
-    let layoverMinutes: Int
+    let layoverMinutes: Int?
 }
 
 // MARK: - Stopover Recommendation

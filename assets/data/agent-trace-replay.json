@@ -1,0 +1,77 @@
+{
+  "note": "Replay of the FlyWith agent system using a recorded June 2026 fare snapshot. It is historical demonstration data, not current live availability. Field `d` is the replay delay in ms before the event fires.",
+  "prompt": "Toronto → Mumbai in November · 2 adults, 2 kids (4 & 7) + grandma · Canadian passports",
+  "events": [
+    { "d": 400, "type": "run.start", "prompt": "Toronto → Mumbai in November · 2 adults, 2 kids (4 & 7) + grandma · Canadian passports" },
+    { "d": 900, "type": "orchestrator.text", "text": "Searching the recorded fare snapshot and checking family logistics in parallel." },
+    { "d": 700, "type": "subagent.start", "agent": "flight-search", "task": "Price YYZ→BOM direct baseline and stopover leg pairs via candidate cities for November." },
+    { "d": 150, "type": "subagent.start", "agent": "family-logistics", "task": "Assess stopover candidates for Canadian passports, two young kids and a senior: visa friction, airport comfort, stroller/wheelchair reality." },
+    { "d": 500, "type": "subagent.tool", "agent": "flight-search", "tool": "list_stopover_candidates", "input": {} },
+    { "d": 300, "type": "subagent.tool_result", "agent": "flight-search", "tool": "list_stopover_candidates", "summary": "[\"DXB\",\"IST\",\"DOH\",\"SIN\"]" },
+    { "d": 300, "type": "subagent.tool", "agent": "family-logistics", "tool": "get_city_facts", "input": { "cityIata": "DXB" } },
+    { "d": 250, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "YYZ", "destination": "BOM" } },
+    { "d": 350, "type": "subagent.tool_result", "agent": "flight-search", "tool": "search_flights", "summary": "$849 (2 stops, 24h) · $1,072 (1 stop, 19.5h) · $1,407 Emirates (18.5h)" },
+    { "d": 250, "type": "subagent.tool_result", "agent": "family-logistics", "tool": "get_city_facts", "summary": "DXB: visa-free 30d (CA), stroller lanes, reliable wheelchair service, summer heat caveat" },
+    { "d": 300, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "YYZ", "destination": "DXB" } },
+    { "d": 200, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "DXB", "destination": "BOM" } },
+    { "d": 300, "type": "subagent.tool_result", "agent": "flight-search", "tool": "search_flights", "summary": "YYZ→DXB $641 Emirates nonstop 12.5h · DXB→BOM $466 nonstop 3h" },
+    { "d": 250, "type": "subagent.tool", "agent": "family-logistics", "tool": "get_city_facts", "input": { "cityIata": "IST" } },
+    { "d": 300, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "YYZ", "destination": "IST" } },
+    { "d": 200, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "IST", "destination": "BOM" } },
+    { "d": 320, "type": "subagent.tool_result", "agent": "flight-search", "tool": "search_flights", "summary": "YYZ→IST $598 nonstop 9.5h · IST→BOM $468 nonstop 6.5h" },
+    { "d": 260, "type": "subagent.tool_result", "agent": "family-logistics", "tool": "get_city_facts", "summary": "IST: e-Visa ~$85/person (CA), free Touristanbul tours, cobblestones fight strollers" },
+    { "d": 280, "type": "subagent.tool", "agent": "flight-search", "tool": "search_flights", "input": { "origin": "YYZ", "destination": "DOH" } },
+    { "d": 200, "type": "subagent.tool", "agent": "family-logistics", "tool": "get_city_facts", "input": { "cityIata": "DOH" } },
+    { "d": 320, "type": "subagent.tool_result", "agent": "flight-search", "tool": "search_flights", "summary": "YYZ→DOH $702 nonstop 12h · DOH→BOM $421 nonstop 3.5h" },
+    { "d": 240, "type": "subagent.tool_result", "agent": "family-logistics", "tool": "get_city_facts", "summary": "DOH: visa-free (CA), compact airport rated best for comfort, flat senior-friendly city" },
+    { "d": 600, "type": "subagent.done", "agent": "flight-search", "report": "Direct baseline: $849 (2 stops, 24h door-to-door) or $1,072 (1 stop). Stopover pairs per seat: DXB $1,107 (641+466, both nonstop) · IST $1,066 (598+468) · DOH $1,123 (702+421). SIN pair prices out at $1,500 — dropped." },
+    { "d": 400, "type": "subagent.done", "agent": "family-logistics", "report": "DXB: best all-round for this family — visa-free, stroller lanes, dependable wheelchair assist; November weather ideal. IST: cheapest friction is financial (~$85/person e-Visa); old town is magic but hard with a stroller. DOH: visa-free and calm, better suited to 2–3 quiet days. No showstoppers." },
+    { "d": 700, "type": "subagent.start", "agent": "stopover-value", "task": "Compute all-in costs and worth-it scores. Direct $849/seat (24h, 2 stops). Pairs per seat: DXB $1,107 · IST $1,066 · DOH $1,123. Family needs 2 hotel rooms." },
+    { "d": 400, "type": "subagent.tool", "agent": "stopover-value", "tool": "estimate_hotel_cost", "input": { "cityIata": "DXB", "nights": 4, "rooms": 2 } },
+    { "d": 250, "type": "subagent.tool_result", "agent": "stopover-value", "tool": "estimate_hotel_cost", "summary": "$145/night × 4 × 2 rooms = $1,160 (estimate)" },
+    { "d": 250, "type": "subagent.tool", "agent": "stopover-value", "tool": "estimate_hotel_cost", "input": { "cityIata": "IST", "nights": 3, "rooms": 2 } },
+    { "d": 250, "type": "subagent.tool_result", "agent": "stopover-value", "tool": "estimate_hotel_cost", "summary": "$95/night × 3 × 2 rooms = $570 (estimate)" },
+    { "d": 250, "type": "subagent.tool", "agent": "stopover-value", "tool": "estimate_hotel_cost", "input": { "cityIata": "DOH", "nights": 2, "rooms": 2 } },
+    { "d": 250, "type": "subagent.tool_result", "agent": "stopover-value", "tool": "estimate_hotel_cost", "summary": "$120/night × 2 × 2 rooms = $480 (estimate)" },
+    { "d": 650, "type": "subagent.done", "agent": "stopover-value", "report": "DXB: +$258/seat in flights + ~$1,160 hotels buys 5 days and splits 24h of travel into 12.5h + 3h — score 86. IST: +$217/seat + ~$570 hotels for 4 days — score 81. DOH: +$274/seat + ~$480 for a calmer 3 days — score 72. All hotel figures are estimates." },
+    { "d": 800, "type": "orchestrator.text", "text": "Draft: Dubai first for this family (fatigue split + accessibility beat the price gap), Istanbul as the budget pick, Doha for a quieter pace. Sending the draft and the full evidence log to the verifier before anything reaches the user." },
+    { "d": 600, "type": "subagent.start", "agent": "verifier", "task": "Audit the draft verdict — every fare, visa rule, hotel figure and score — against the raw evidence log." },
+    { "d": 1400, "type": "subagent.done", "agent": "verifier", "report": "All fares match search_flights results exactly — VERIFIED. Hotel totals derive from estimate_hotel_cost — ESTIMATED, and the draft labels them as estimates. Visa claims match editorial city facts. Because hotel estimates are load-bearing in the all-in figures, every option is marked dataStatus: estimated, not verified. APPROVED." },
+    { "d": 700, "type": "verdict", "verdict": {
+      "route": "YYZ → BOM",
+      "summary": "Yes — a stopover beats the 24-hour sprint for this family. Dubai adds 5 vacation days and cuts the longest leg to 12.5 hours for $258 more per seat; Istanbul is the budget pick at +$217.",
+      "directBaselineCAD": 849,
+      "options": [
+        {
+          "stopoverCity": "Dubai", "iata": "DXB", "suggestedDays": 5,
+          "flightTotalCAD": 1107, "hotelEstimateCAD": 1160, "deltaVsDirectCAD": 258,
+          "worthItScore": 86,
+          "visaVerdict": "Visa-free 30 days for Canadian passports",
+          "highlight": "Longest leg drops from 24h to a 12.5h nonstop — nap-schedule friendly, and DXB's wheelchair service is dependable for grandma",
+          "caution": "Two hotel rooms are the real cost: budget roughly $2.3K extra for the whole family",
+          "dataStatus": "estimated"
+        },
+        {
+          "stopoverCity": "Istanbul", "iata": "IST", "suggestedDays": 4,
+          "flightTotalCAD": 1066, "hotelEstimateCAD": 570, "deltaVsDirectCAD": 217,
+          "worthItScore": 81,
+          "visaVerdict": "e-Visa online, ~$85 per Canadian passport",
+          "highlight": "Cheapest way to turn the journey into a holiday — both legs nonstop, hotels from $95/night",
+          "caution": "Old-town cobblestones are a fight with a stroller; e-Visa fees add ~$425 for five travellers",
+          "dataStatus": "estimated"
+        },
+        {
+          "stopoverCity": "Doha", "iata": "DOH", "suggestedDays": 3,
+          "flightTotalCAD": 1123, "hotelEstimateCAD": 480, "deltaVsDirectCAD": 274,
+          "worthItScore": 72,
+          "visaVerdict": "Visa-free entry for Canadian passports",
+          "highlight": "Calmest option: compact top-rated airport, flat accessible city — easiest on the senior traveller",
+          "caution": "Two to three days is the ceiling before Doha runs quiet for young kids",
+          "dataStatus": "estimated"
+        }
+      ],
+      "verifierNote": "Fares match the recorded June 2026 snapshot; hotel figures are estimates and every option is labeled accordingly."
+    } },
+    { "d": 500, "type": "run.done" }
+  ]
+}

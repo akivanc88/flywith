@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RecommendationDetailView: View {
     let recommendation: StopoverRecommendation
+    let fareSourceName: String
+    let fareEvidenceNote: String
     @AppStorage(SavedTripStore.key) private var savedStopoverCodes = ""
     private var city: StopoverCity { recommendation.stopoverCity }
     private var isSaved: Bool { SavedTripStore.contains(city.iataCode, in: savedStopoverCodes) }
@@ -24,6 +26,9 @@ struct RecommendationDetailView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: FWRadius.xl2))
                 .padding(.horizontal)
+
+                FareSourceSection(sourceName: fareSourceName, note: fareEvidenceNote)
+                    .padding(.horizontal)
 
                 // Price breakdown
                 FWSection("Worth-it verdict") {
@@ -101,9 +106,14 @@ struct RecommendationDetailView: View {
                 .padding(.horizontal)
 
                 // Book buttons
-                VStack(spacing: 12) {
-                    BookButton(title: "Book Leg 1 on Kiwi", subtitle: "\(recommendation.leg1.origin) → \(recommendation.leg1.destination) · CAD \(Int(recommendation.leg1.price))", url: recommendation.leg1.bookingURL, color: FWColor.brandPrimary)
-                    BookButton(title: "Book Leg 2 on Kiwi", subtitle: "\(recommendation.leg2.origin) → \(recommendation.leg2.destination) · CAD \(Int(recommendation.leg2.price))", url: recommendation.leg2.bookingURL, color: FWColor.booking)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Book as two simple legs")
+                        .font(.headline)
+                    Text("Open each booking site in order, confirm dates and baggage, then compare the final total with Google Flights before purchase.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    BookButton(title: "\(recommendation.leg1.bookingSource.actionLabel) — Leg 1", subtitle: "\(recommendation.leg1.origin) → \(recommendation.leg1.destination) · CAD \(Int(recommendation.leg1.price))", url: recommendation.leg1.bookingURL, color: FWColor.brandPrimary)
+                    BookButton(title: "\(recommendation.leg2.bookingSource.actionLabel) — Leg 2", subtitle: "\(recommendation.leg2.origin) → \(recommendation.leg2.destination) · CAD \(Int(recommendation.leg2.price))", url: recommendation.leg2.bookingURL, color: FWColor.booking)
                     Text("Can't find a better deal? Check Google Flights or Skyscanner.")
                         .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     Text("FlyWith does not sell tickets in v1. It explains the tradeoff, then hands off to booking sites.")
@@ -132,6 +142,33 @@ struct RecommendationDetailView: View {
                 .accessibilityLabel(isSaved ? "Remove \(city.cityName) from saved trips" : "Save \(city.cityName)")
             }
         }
+    }
+}
+
+struct FareSourceSection: View {
+    let sourceName: String
+    let note: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "checklist.checked")
+                .foregroundStyle(FWColor.brandPrimary)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(sourceName)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(FWColor.textStrong)
+                Text(note)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(FWColor.surfaceGoldSoft)
+        .clipShape(RoundedRectangle(cornerRadius: FWRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: FWRadius.lg).stroke(FWColor.brandHighlight.opacity(0.35)))
     }
 }
 
@@ -194,11 +231,21 @@ struct ScoreRow: View {
 struct BookButton: View {
     let title: String
     let subtitle: String
-    let url: String
+    let url: String?
     let color: Color
 
     var body: some View {
-        Link(destination: URL(string: url) ?? URL(string: "https://letsfg.co")!) {
+        Group {
+            if let url, let destination = URL(string: url) {
+                Link(destination: destination) { label }
+            } else {
+                label.opacity(0.65)
+                    .accessibilityHint("No offer-specific booking link was provided")
+            }
+        }
+    }
+
+    private var label: some View {
             VStack(spacing: 3) {
                 Text(title).font(.subheadline).fontWeight(.bold)
                 Text(subtitle).font(.caption).opacity(0.85)
@@ -206,6 +253,5 @@ struct BookButton: View {
             .frame(maxWidth: .infinity).padding()
             .background(color).foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: FWRadius.xl))
-        }
     }
 }

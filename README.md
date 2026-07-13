@@ -14,7 +14,7 @@ Google Flights shows you `Toronto → Mumbai from $849`. What it doesn't tell yo
 
 ## Live demo
 
-Prices fetched June 2026:
+Historical fare snapshot observed June 2026 (not current live availability):
 
 | Route | Cost | Bonus days |
 |---|---|---|
@@ -51,7 +51,7 @@ Prices fetched June 2026:
 1. Clone this repo
 2. Open `FlyWith/FlyWith.xcodeproj` in Xcode
 3. Set your API key in the scheme environment variables:
-   - `LETSFG_API_KEY` — register at [letsfg.co/developers](https://letsfg.co/developers) (preferred, free 90-day token)
+   - `LETSFG_API_KEY` — register for a Bearer token at [letsfg.co/for-agents](https://letsfg.co/for-agents) (preferred, free 90-day token)
    - `KIWI_API_KEY` — legacy fallback, free at [tequila.kiwi.com](https://tequila.kiwi.com)
    - If neither key is set, the app uses built-in mock data and works fully in Simulator
 4. Run on simulator or device (iOS 17+)
@@ -64,6 +64,13 @@ python3 -m http.server 8080
 ```
 
 Deploy to GitHub Pages — it's a single HTML file, no build step required.
+
+The agent trace shown by default is a historical snapshot replay. Add
+`?agent=http://localhost:8787` while running the agent server to create a fresh
+run with `POST /api/plan` and stream its curated progress events from the
+opaque `eventsUrl` returned by that request. The browser does not display model
+reasoning. Trace evidence uses four provenance states: `live`, `snapshot`,
+`estimated`, and `editorial`; a snapshot must never be presented as live data.
 
 ## Project structure
 
@@ -108,7 +115,7 @@ The repo includes the real-application transition plan:
 - [`docs/market-research.md`](docs/market-research.md) — competitor map, Reddit/customer signals, supply feasibility, and validation plan.
 - [`docs/real-app-roadmap.md`](docs/real-app-roadmap.md) — MVP boundary, data model direction, API research, and launch readiness gates.
 
-The current app still runs with mock data when no `KIWI_API_KEY` is configured. The goal is to replace mock fare and city facts cautiously, source by source, without pretending editorial estimates are verified live data.
+The current app still runs with mock data when no `LETSFG_API_KEY` or `KIWI_API_KEY` is configured. The goal is to replace mock fare and city facts cautiously, source by source, without pretending editorial estimates are verified live data.
 
 ## Contributing
 
