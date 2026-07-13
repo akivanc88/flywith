@@ -366,7 +366,8 @@ final class LetsFGDecodingTests: XCTestCase {
         let offer = try XCTUnwrap(response.offers?.first)
         XCTAssertEqual(response.status, "completed")
         XCTAssertEqual(offer.price, 89.50, accuracy: 0.01)
-        XCTAssertEqual(offer.googleFlightsPrice, 109.00, accuracy: 0.01)
+        let googleFlightsPrice = try XCTUnwrap(offer.googleFlightsPrice)
+        XCTAssertEqual(googleFlightsPrice, 109.00, accuracy: 0.01)
         XCTAssertEqual(offer.durationMinutes, 125)
     }
 
