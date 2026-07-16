@@ -151,11 +151,14 @@ struct RecommendationCard: View {
             Divider()
 
             HStack {
-                if recommendation.hasSavings {
-                    Label("Save CAD \(Int(recommendation.savings)) vs direct", systemImage: "tag.fill")
+                if let savings = recommendation.savings, savings > 0 {
+                    Label("Save CAD \(Int(savings)) vs direct", systemImage: "tag.fill")
                         .font(.caption).fontWeight(.semibold).foregroundStyle(FWColor.success)
+                } else if let savings = recommendation.savings {
+                    Label("CAD \(Int(-savings)) more before hotels — compare comfort", systemImage: "scale.3d")
+                        .font(.caption).foregroundStyle(.secondary)
                 } else {
-                    Label("CAD \(Int(-recommendation.savings)) more before hotels — compare comfort", systemImage: "scale.3d")
+                    Label("No direct fare to compare, judge on comfort", systemImage: "questionmark.circle")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()

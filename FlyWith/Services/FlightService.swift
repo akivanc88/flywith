@@ -130,8 +130,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         Publishers.Zip3(direct, leg1, leg2)
             .map { [weak self] directOffer, leg1Offer, leg2Offer -> [StopoverRecommendation?] in
                 guard let self, let leg1Offer, let leg2Offer else { return [nil] }
-                let stopoverTotal = leg1Offer.price + leg2Offer.price
-                let comparisonPrice = directOffer?.googleFlightsPrice ?? directOffer?.price ?? stopoverTotal
+                let comparisonPrice = directOffer?.googleFlightsPrice ?? directOffer?.price
                 return [self.buildLetsFGRecommendation(query: query, stopover: city, leg1: leg1Offer,
                                                        leg2: leg2Offer, directComparisonPrice: comparisonPrice)]
             }
@@ -171,7 +170,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         stopover: StopoverCity,
         leg1: LetsFGAgentOffer,
         leg2: LetsFGAgentOffer,
-        directComparisonPrice: Double
+        directComparisonPrice: Double?
     ) -> StopoverRecommendation {
         let badge: RecommendationBadge = switch query.criteria {
         case .withKids:      .familyPick
@@ -278,6 +277,8 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
                     return Just(bestOffer).setFailureType(to: Error.self).eraseToAnyPublisher()
                 case "expired":
                     return Fail(error: LetsFGAPIError.searchExpired).eraseToAnyPublisher()
+                case "failed", "error", "cancelled":
+                    return Fail(error: LetsFGAPIError.searchFailed(status: response.status)).eraseToAnyPublisher()
                 default:
                     guard attemptsRemaining > 0 else {
                         return Fail(error: LetsFGAPIError.pollingTimedOut).eraseToAnyPublisher()
@@ -447,7 +448,9 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         fmt.dateFormat = "dd/MM/yyyy"
         let date = fmt.string(from: query.departureDate)
 
-        guard let url = kiwiSearchURL(from: query.origin, to: query.destination, date: date, query: query) else {
+        // A true direct baseline: without max_stopovers=0 the cheapest 2-stop
+        // itinerary would masquerade as the "direct" fare and skew savings.
+        guard let url = kiwiSearchURL(from: query.origin, to: query.destination, date: date, query: query, maxStopovers: 0) else {
             completion(nil)
             return
         }
@@ -492,7 +495,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             .store(in: &cancellables)
     }
 
-    private func kiwiSearchURL(from: String, to: String, date: String, query: FlightSearch) -> URL? {
+    private func kiwiSearchURL(from: String, to: String, date: String, query: FlightSearch, maxStopovers: Int? = nil) -> URL? {
         var c = URLComponents(string: "\(kiwiBase)/v2/search")!
         c.queryItems = [
             .init(name: "fly_from", value: from),
@@ -506,6 +509,9 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             .init(name: "sort", value: "price"),
             .init(name: "limit", value: "1"),
         ]
+        if let maxStopovers {
+            c.queryItems?.append(.init(name: "max_stopovers", value: "\(maxStopovers)"))
+        }
         return c.url
     }
 
@@ -563,7 +569,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             ),
             stopoverDays: query.minStopoverDays,
             totalPrice: leg1.price + leg2.price,
-            directComparisonPrice: leg1.price + leg2.price,
+            directComparisonPrice: nil,
             badge: badge
         )
     }
@@ -578,7 +584,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             leg2: recommendation.leg2,
             stopoverDays: recommendation.stopoverDays,
             totalPrice: recommendation.totalPrice,
-            directComparisonPrice: directPrice ?? recommendation.totalPrice,
+            directComparisonPrice: directPrice,
             badge: recommendation.badge
         )
     }
@@ -600,6 +606,7 @@ private enum LetsFGAPIError: Error, LocalizedError {
     case clarificationNeeded(String)
     case missingSearchId
     case searchExpired
+    case searchFailed(status: String)
     case pollingTimedOut
 
     var errorDescription: String? {
@@ -614,6 +621,7 @@ private enum LetsFGAPIError: Error, LocalizedError {
         case .clarificationNeeded(let question): return question
         case .missingSearchId: return "LetsFG did not return a search id"
         case .searchExpired: return "LetsFG search expired before results were ready"
+        case .searchFailed(let status): return "LetsFG reported the search as \(status)"
         case .pollingTimedOut: return "LetsFG search timed out while waiting for results"
         }
     }
