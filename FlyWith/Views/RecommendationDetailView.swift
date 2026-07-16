@@ -60,15 +60,25 @@ struct RecommendationDetailView: View {
                         PriceRow(label: "Estimated hotel base", price: recommendation.estimatedHotelTotal)
                         Divider()
                         PriceRow(label: "Flight + hotel estimate", price: recommendation.estimatedTripTotal, isBold: true)
-                        PriceRow(label: "Direct comparison", price: recommendation.directComparisonPrice, style: .strikethrough)
-                        HStack {
-                            Text(recommendation.hasSavings ? "Fare savings before hotels" : "Fare premium before hotels")
-                            Spacer()
-                            Text("CAD \(Int(abs(recommendation.savings)))")
-                                .fontWeight(.bold)
-                                .foregroundStyle(recommendation.hasSavings ? FWColor.success : FWColor.brandAccent)
+                        if let directPrice = recommendation.directComparisonPrice, let savings = recommendation.savings {
+                            PriceRow(label: "Direct comparison", price: directPrice, style: .strikethrough)
+                            HStack {
+                                Text(recommendation.hasSavings ? "Fare savings before hotels" : "Fare premium before hotels")
+                                Spacer()
+                                Text("CAD \(Int(abs(savings)))")
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(recommendation.hasSavings ? FWColor.success : FWColor.brandAccent)
+                            }
+                            .font(.subheadline)
+                        } else {
+                            HStack {
+                                Text("Direct fare comparison")
+                                Spacer()
+                                Text("unavailable for these dates")
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                         }
-                        .font(.subheadline)
                     }
                 }
                 .padding(.horizontal)
