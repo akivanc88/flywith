@@ -51,6 +51,7 @@
   }
 
   function money(n) { return "$" + Number(n).toLocaleString("en-CA"); }
+  function signedMoney(n) { return n < 0 ? "−" + money(-n) : "+" + money(n); }
 
   function renderVerdict(v) {
     verdictPane.innerHTML = "";
@@ -81,7 +82,7 @@
       card.appendChild(top);
 
       [
-        ["at-dim", money(o.flightTotalCAD) + "/seat flights (+" + money(o.deltaVsDirectCAD) + " vs direct) · hotel est. " + money(o.hotelEstimateCAD)],
+        ["at-dim", money(o.flightTotalCAD) + "/seat flights (" + signedMoney(o.deltaVsDirectCAD) + " vs direct) · hotel est. " + money(o.hotelEstimateCAD)],
         ["", "✅ " + o.highlight],
         ["", "⚠️ " + o.caution],
         ["at-dim", "🛂 " + o.visaVerdict]

@@ -7,7 +7,7 @@ final class WorthItScoreTests: XCTestCase {
 
     private func makeRec(
         totalPrice: Double,
-        directPrice: Double,
+        directPrice: Double?,
         stopoverDays: Int,
         scores: StopoverScores = StopoverScores(family: 3, seniors: 3, budget: 3, explorer: 3, overall: 3)
     ) -> StopoverRecommendation {
@@ -72,6 +72,14 @@ final class WorthItScoreTests: XCTestCase {
         let rec = makeRec(totalPrice: 772, directPrice: 1072, stopoverDays: 0, scores: scores)
         XCTAssertEqual(rec.worthItScore, 30)
     }
+
+    func testMissingBaselineHasNoSavingsAndNeutralFareScore() {
+        let scores = StopoverScores(family: 0, seniors: 0, budget: 0, explorer: 0, overall: 0)
+        let rec = makeRec(totalPrice: 1000, directPrice: nil, stopoverDays: 0, scores: scores)
+        XCTAssertNil(rec.savings)
+        XCTAssertFalse(rec.hasSavings)
+        XCTAssertEqual(rec.worthItScore, 15, "unknown baseline must score the fare axis neutral, not as savings")
+    }
 }
 
 // MARK: - Group 2: LetsFG agent offer mapping
@@ -130,8 +138,8 @@ final class LetsFGMappingTests: XCTestCase {
             leg2: makeOffer(price: 300),
             directComparisonPrice: 950
         )
-        XCTAssertEqual(rec.directComparisonPrice, 950, accuracy: 0.01)
-        XCTAssertEqual(rec.savings, 150, accuracy: 0.01)
+        XCTAssertEqual(rec.directComparisonPrice ?? .nan, 950, accuracy: 0.01)
+        XCTAssertEqual(rec.savings ?? .nan, 150, accuracy: 0.01)
     }
 
     func testDurationMapsFromAgentOffer() {

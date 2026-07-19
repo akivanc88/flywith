@@ -156,11 +156,13 @@ struct StopoverRecommendation: Identifiable {
     let leg2: FlightLeg
     let stopoverDays: Int
     let totalPrice: Double      // CAD
-    let directComparisonPrice: Double
+    /// nil when no direct fare could be fetched; the UI must say so rather
+    /// than fabricate a baseline from the stopover total.
+    let directComparisonPrice: Double?
     let badge: RecommendationBadge
 
-    var savings: Double { directComparisonPrice - totalPrice }
-    var hasSavings: Bool { savings > 0 }
+    var savings: Double? { directComparisonPrice.map { $0 - totalPrice } }
+    var hasSavings: Bool { (savings ?? 0) > 0 }
     var costPerStopoverDay: Double { totalPrice / Double(stopoverDays) }
 
     var estimatedHotelTotal: Double {
@@ -177,7 +179,8 @@ struct StopoverRecommendation: Identifiable {
     }
 
     var worthItScore: Int {
-        let fareComponent = max(0, min(30, (directComparisonPrice - totalPrice + 300) / 20))
+        // Without a real baseline the fare axis is unknown: score it neutral (15/30).
+        let fareComponent = directComparisonPrice.map { max(0, min(30, ($0 - totalPrice + 300) / 20)) } ?? 15
         let comfortComponent = comfortScore * 10
         let stopoverComponent = min(Double(stopoverDays), 7) * 2
         return Int(min(100, max(0, fareComponent + comfortComponent + stopoverComponent)))
