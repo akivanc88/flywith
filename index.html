@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FlyWith — Is this stopover worth it for your family?</title>
   <meta name="description" content="FlyWith turns brutal long-haul layovers into 3–7 day family adventures. We score stopover routes by fare, hotel cost, visa friction, airport comfort, accessibility, and family logistics — often cheaper than Google Flights." />
   <meta name="theme-color" content="#0c6b6e" />
@@ -14,7 +14,7 @@
   <meta property="og:type" content="website" />
 
   <link rel="stylesheet" href="Web/design-tokens.css" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" /><link rel="stylesheet" href="assets/css/app-shell.css" />
 </head>
 <body id="top">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -54,61 +54,27 @@
   <main id="main">
 
     <!-- ===== HERO ===== -->
-    <section class="hero">
+    <section class="hero" id="plan">
       <div class="container hero-inner">
         <div class="hero-copy">
-          <span class="hero-badge reveal">🧳 The family stopover advisor</span>
-          <h1 class="reveal">Is this stopover <em>worth it</em> for your family?</h1>
-          <p class="hero-lede reveal">FlyWith finds long-haul routes with 3–7 day stopovers that turn a brutal 20-hour journey into a bonus family vacation — scored by fare, hotel cost, visa friction, airport comfort, accessibility and travel fatigue. Often cheaper than Google Flights.</p>
+          <span class="hero-badge reveal">A softer landing</span>
+          <h1 class="reveal">Make the journey<br /><em>part of the trip.</em></h1>
+          <p class="hero-lede reveal">A few days to recharge. A new city to explore. Compare stopovers with family comfort in mind.</p>
           <div class="hero-cta reveal">
-            <a class="btn btn-primary" href="#demo">🔍 See the worth-it demo</a>
+            <a class="btn btn-primary" href="#demo">Compare sample routes</a>
             <a class="btn btn-secondary" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">⭐ Star on GitHub</a>
           </div>
-          <p class="hero-trust reveal">Toronto → Mumbai · real Kiwi fares · hands off to the cheapest booking site, every time.</p>
+          <p class="hero-trust reveal">Explore a sample trip below. Prices are historical; booking links open external search sites.</p>
         </div>
 
-        <div class="hero-globe" aria-label="A globe showing flight routes from Toronto out to stopover cities">
-          <!-- 3D globe mounts here when supported; otherwise the SVG below shows. -->
-          <div class="globe-canvas-host" id="globe-host"></div>
-          <svg class="globe-fallback" id="globe-fallback" viewBox="0 0 460 460" role="img" aria-label="Flight arcs from Toronto to Dubai, Istanbul, Doha and Singapore">
-            <defs>
-              <radialGradient id="globeGrad" cx="38%" cy="34%" r="72%">
-                <stop offset="0%" stop-color="#0e6f72" />
-                <stop offset="60%" stop-color="#0b4a4c" />
-                <stop offset="100%" stop-color="#062a2c" />
-              </radialGradient>
-              <clipPath id="globeClip"><circle cx="230" cy="230" r="180" /></clipPath>
-            </defs>
-            <circle class="globe-face" cx="230" cy="230" r="180" />
-            <g clip-path="url(#globeClip)" opacity="0.9">
-              <ellipse class="grid-line" cx="230" cy="230" rx="60" ry="180" />
-              <ellipse class="grid-line" cx="230" cy="230" rx="120" ry="180" />
-              <ellipse class="grid-line" cx="230" cy="230" rx="180" ry="180" />
-              <line class="grid-line" x1="50" y1="230" x2="410" y2="230" />
-              <ellipse class="grid-line" cx="230" cy="150" rx="172" ry="40" />
-              <ellipse class="grid-line" cx="230" cy="310" rx="172" ry="40" />
-            </g>
-            <!-- arcs -->
-            <path class="arc" d="M95,205 Q150,90 255,110" style="--len:360; --delay:.35s" />
-            <path class="arc gold" d="M95,205 Q200,118 300,150" style="--len:360; --delay:.6s" />
-            <path class="arc gold" d="M95,205 Q200,150 315,200" style="--len:360; --delay:.85s" />
-            <path class="arc" d="M95,205 Q215,250 340,250" style="--len:360; --delay:1.1s" />
-            <!-- origin -->
-            <circle class="origin-dot" cx="95" cy="205" r="6" />
-            <text class="city-label" x="64" y="232" style="--delay:.2s">Toronto</text>
-            <!-- destinations -->
-            <circle class="city-dot" cx="255" cy="110" r="5" style="--delay:.35s" />
-            <text class="city-label" x="232" y="98" style="--delay:.35s">Istanbul</text>
-            <circle class="city-dot" cx="300" cy="150" r="5" style="--delay:.6s" />
-            <text class="city-label" x="310" y="148" style="--delay:.6s">Dubai</text>
-            <circle class="city-dot" cx="315" cy="200" r="5" style="--delay:.85s" />
-            <text class="city-label" x="325" y="204" style="--delay:.85s">Doha</text>
-            <circle class="city-dot" cx="340" cy="250" r="5" style="--delay:1.1s" />
-            <text class="city-label" x="318" y="276" style="--delay:1.1s">Singapore</text>
-          </svg>
-        </div>
+        <aside class="trip-overview" aria-label="Demo trip overview">
+          <div class="trip-caption"><span>Your next chapter</span><span class="snapshot-label">Sample trip</span></div>
+          <div class="trip-airports"><div><strong>YYZ</strong><span>Toronto</span></div><span class="trip-path" aria-hidden="true">···· ✈ ····</span><div><strong>BOM</strong><span>Mumbai</span></div></div>
+          <div class="trip-details"><span>15 Sep 2026</span><span>2 adults · Economy</span></div>
+          <a class="trip-discovery" href="#cities"><span class="trip-discovery-icon" aria-hidden="true">✧</span><span><strong>A little more journey.</strong><small>Discover a city along the way</small></span><span aria-hidden="true">›</span></a>
+          <p class="trip-evidence">June 2026 fare snapshot · not live availability</p>
+        </aside>
       </div>
-
       <div class="container">
         <div class="hero-stats reveal">
           <div class="stat">
@@ -217,8 +183,8 @@
       <div class="container">
         <div class="section-head center reveal">
           <span class="eyebrow">Worth-it demo</span>
-          <h2 class="section-title">Toronto → Mumbai, September 15</h2>
-          <p class="section-sub" style="margin-left:auto;margin-right:auto;">Real Kiwi fares captured June 2026. Switch tabs to see why price alone isn't enough for family travel.</p>
+          <h2 class="section-title">Your route options</h2>
+          <p class="section-sub" style="margin-left:auto;margin-right:auto;">Compare a quick connection with a few days away. June 2026 fare snapshot, not current availability.</p>
         </div>
 
         <div class="demo-card reveal">
@@ -229,8 +195,8 @@
           </div>
           <div class="demo-body">
             <div class="demo-tabs" role="tablist" aria-label="Route comparison">
-              <button class="demo-tab active" role="tab" aria-selected="true" id="tab-quick" aria-controls="panel-quick" onclick="flywithSwitchTab(this,'quick')">😐 Quick connections</button>
-              <button class="demo-tab" role="tab" aria-selected="false" id="tab-smart" aria-controls="panel-smart" onclick="flywithSwitchTab(this,'smart')">✨ Smart layovers</button>
+              <button class="demo-tab active" role="tab" aria-selected="true" id="tab-quick" aria-controls="panel-quick" onclick="flywithSwitchTab(this,'quick')">Quick connections</button>
+              <button class="demo-tab" role="tab" aria-selected="false" id="tab-smart" aria-controls="panel-smart" onclick="flywithSwitchTab(this,'smart')">Stopover trips</button>
             </div>
 
             <!-- QUICK CONNECTIONS -->
@@ -564,7 +530,7 @@
     <section class="section cta" id="app">
       <div class="container">
         <span class="badge-light reveal">📱 iOS app in development</span>
-        <h2 class="reveal">Join the family stopover waitlist</h2>
+        <h2 class="reveal">Try the iOS prototype</h2>
         <p class="reveal">FlyWith is moving from mock demo to real app carefully: live fares first, then verified visa rules, airport comfort, hotel estimates and price watch.</p>
         <div class="cta-actions reveal">
           <a class="btn btn-ghost" href="https://github.com/akivanc88/flywith" target="_blank" rel="noopener">⌘ Run the prototype in Xcode</a>
@@ -593,14 +559,20 @@
     </div>
   </footer>
 
+  <nav class="app-tabbar" aria-label="App navigation">
+    <a href="#plan" data-screen-link="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 18-7-7 18-3-8-8-3Z"/><path d="m11 13 5-5"/></svg><span>Plan</span></a>
+    <a href="#cities" data-screen-link="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6 6-2Z"/></svg><span>Explore</span></a>
+    <a href="#profiles" data-screen-link="travelers"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v3"/></svg><span>Travelers</span></a>
+    <a href="#how" data-screen-link="about"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></svg><span>About</span></a>
+  </nav>
   <!-- Vendored libraries (self-hosted, no CDN dependency). All animation is
        progressive enhancement; the page is fully usable if these fail to load. -->
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
-  <script defer src="assets/vendor/three.min.js"></script>
-  <script defer src="assets/js/main.js"></script>
-  <script defer src="assets/js/globe-land.js"></script>
-  <script defer src="assets/js/globe.js"></script>
+
+  <script defer src="assets/js/main.js"></script><script defer src="assets/js/app-shell.js"></script>
+
+
   <script defer src="assets/js/agent-trace.js"></script>
 </body>
 </html>

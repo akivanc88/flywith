@@ -40,12 +40,12 @@
     document.querySelectorAll(".demo-tab").forEach(function (t) {
       var on = t === btn;
       t.classList.toggle("active", on);
-      t.setAttribute("aria-selected", String(on));
+      t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
     });
-    document.querySelectorAll(".demo-panel").forEach(function (p) { p.classList.remove("active"); });
+    document.querySelectorAll(".demo-panel").forEach(function (p) { p.classList.remove("active"); p.hidden = true; });
     var panel = document.getElementById("panel-" + id);
     if (panel) {
-      panel.classList.add("active");
+      panel.classList.add("active"); panel.hidden = false;
       if (animate) {
         window.gsap.fromTo(panel.children, { opacity: 0, y: 14 },
           { opacity: 1, y: 0, duration: 0.4, stagger: 0.07, ease: "power2.out", clearProps: "all" });
@@ -137,7 +137,7 @@
     // animate TO the visible state.
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
     tl.to(".hero .reveal", { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 })
-      .from(".hero-globe", { opacity: 0, scale: 0.92, duration: 0.9 }, "-=0.7");
+      .from(".trip-overview", { opacity: 0, scale: 0.98, duration: 0.5 }, "-=0.4");
 
     // Reveal-on-scroll for everything tagged .reveal outside the hero
     if (window.ScrollTrigger) {

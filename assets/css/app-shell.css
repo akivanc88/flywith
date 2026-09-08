@@ -1,0 +1,96 @@
+/* Website app shell, using FlyWith's existing teal brand. */
+:root { --maxw: 1000px; --surface-page: #f2f3f7; --surface-sunken: #f2f3f7; --text-subtle: #697774; }
+[hidden] { display: none !important; }
+html { scroll-padding-top: 88px; }
+body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; }
+button, a { -webkit-tap-highlight-color: transparent; }
+.site-nav { background: rgba(242,243,247,.93); border-bottom: 1px solid #dfe3e5; }
+.nav-links { gap: 18px; }
+.nav-links a { font-size: .8rem; min-height: 44px; display: inline-flex; align-items: center; }
+.nav-cta { display: none; }
+.hero { background: transparent; }
+.hero::after { display: none; }
+.hero-inner { padding: 44px 24px 24px; gap: 48px; grid-template-columns: 1.1fr 1fr; text-align: left; }
+.hero-badge { padding: 0; border: 0; box-shadow: none; background: transparent; color: var(--color-brand-primary); margin-bottom: 14px; }
+.hero h1 { font-size: clamp(2rem,4vw,3rem); line-height: 1.08; font-weight: 750; }
+.hero h1 em { color: var(--color-brand-primary); white-space: normal; }
+.hero h1 em::after { display: none; }
+.hero-lede { font-size: 1rem; margin-bottom: 22px; }
+.hero-cta { justify-content: flex-start; }
+.hero-cta .btn-secondary { display: none; }
+.hero-trust { max-width: 390px; font-size: .75rem; }
+.hero-stats { display: none; }
+.btn, .book-link { box-shadow: none; min-height: 46px; border-radius: 14px; }
+.trip-overview { background: #fff; border: 1px solid #e2e6e5; border-radius: 26px; padding: 24px; box-shadow: 0 8px 28px #19302d08; }
+.trip-caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .8rem; font-weight: 600; }
+.snapshot-label { color: var(--color-brand-primary); background: #e9f5f1; border-radius: 7px; padding: 4px 8px; font-size: .7rem; }
+.trip-airports { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 20px; }
+.trip-airports strong { display: block; font-size: 2.2rem; letter-spacing: -.05em; color: var(--text-strong); line-height: 1.1; }
+.trip-airports div:last-child { text-align: right; }
+.trip-airports span { font-size: .8rem; color: var(--text-muted); }
+.trip-airports .trip-path { color: var(--color-brand-primary); font-size: 1.3rem; }
+.trip-details { display: flex; justify-content: space-between; font-size: .75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); padding-bottom: 18px; gap: 12px; }
+.trip-discovery { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+.trip-discovery-icon { background: #eaf5f1; border-radius: 12px; padding: 6px 12px; color: var(--color-brand-primary); font-size: 1.6rem; }
+.trip-discovery strong, .trip-discovery small { display: block; }
+.trip-discovery strong { font-size: .85rem; }
+.trip-discovery small { font-size: .75rem; color: var(--text-muted); }
+.trip-discovery > span:last-child { margin-left: auto; font-size: 1.5rem; }
+.trip-evidence { font-size: .7rem; color: var(--text-muted); }
+.section { padding: 32px 0; }
+.section-head, .section-head.center { text-align: left; max-width: none; margin: 0 0 22px; }
+.section-title { font-size: 1.8rem; margin-bottom: 8px; }
+.section-sub { font-size: .95rem; max-width: 620px; margin-left: 0 !important; }
+.eyebrow { font-size: .7rem; letter-spacing: .09em; padding: 0; background: transparent; margin-bottom: 8px; }
+.demo-card { border: 0; box-shadow: none; background: transparent; overflow: visible; }
+.demo-top { background: transparent; color: var(--text-strong); padding: 0 0 16px; gap: 8px; }
+.demo-top .route { font-size: .9rem; }
+.demo-top .meta { color: var(--text-muted); font-size: .75rem; }
+.demo-body { padding: 0; }
+.demo-tabs { display: flex; background: #e2e5e8; padding: 4px; border: 0; border-radius: 12px; margin-bottom: 22px; }
+.demo-tab { flex: 1; border-radius: 9px; min-height: 44px; font-size: .85rem; }
+.demo-tab.active { background: #fff; color: var(--text-strong); box-shadow: 0 2px 5px #00000012; }
+.flight-card { border: 1px solid #e2e6e5; border-radius: 22px; padding: 22px; }
+.flight-card.winner { box-shadow: none; }
+.how-step, .profile-card, .research-card { border: 1px solid #e2e6e5; border-radius: 20px; }
+.city-card { border-radius: 24px; box-shadow: none; }
+.profile-card[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--color-brand-primary); }
+.app-tabbar { position: fixed; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(460px, calc(100% - 32px)); z-index: 110; display: grid; grid-template-columns: repeat(4,1fr); border: 1px solid #dce2e0; border-radius: 24px; padding: 7px; background: rgba(255,255,255,.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px #12332e16; }
+.app-tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; font-size: .7rem; font-weight: 600; color: var(--text-muted); border-radius: 18px; }
+.app-tabbar a[aria-current] { color: var(--color-brand-primary); background: #eaf5f1; }
+.app-tabbar svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.app-ready .reveal, .app-ready .reveal-scale { opacity: 1 !important; transform: none !important; }
+.app-ready body:not([data-screen="about"]) .site-foot { display: none; }
+@media (max-width: 760px) {
+  :root { --nav-h: 60px; }
+  .nav-inner { padding: 0 20px; }
+  .nav-brand { font-size: 1rem; }
+  .nav-brand img { width: 28px; height: 28px; }
+  .nav-toggle { min-width: 44px; min-height: 44px; }
+  .hero-inner { grid-template-columns: 1fr; padding: 26px 20px 8px; gap: 24px; }
+  .hero-copy { text-align: left; }
+  .hero h1 { font-size: 2.1rem; }
+  .hero-lede { margin-left: 0; margin-right: 0; }
+  .hero-cta { margin-bottom: 0; }
+  .hero-trust { margin-top: 10px; }
+  .trip-overview { padding: 20px; }
+  .trip-airports { padding: 20px 0; }
+  .container { padding-left: 20px; padding-right: 20px; }
+  .section { padding: 26px 0; }
+  .section-title { font-size: 1.6rem; }
+  .demo-top .flag { display: none; }
+  .demo-top .meta { margin-left: 0; flex-basis: 100%; }
+  .flight-card { padding: 20px 16px; }
+  .fc-head { flex-wrap: wrap; }
+  .demo-tab { padding: 8px; }
+  .profile-grid { grid-template-columns: 1fr; gap: 10px; }
+  .profile-card { padding: 18px; }
+  .how-grid { grid-template-columns: 1fr; gap: 12px; }
+  .problem .container { padding-top: 28px; padding-bottom: 28px; }
+  .problem h2 { font-size: 1.5rem; }
+  .at-toolbar { flex-wrap: wrap; }
+  .at-status { min-width: 0; overflow-wrap: anywhere; }
+  .app-tabbar { bottom: 0; width: 100%; border-radius: 0; border-width: 1px 0 0; padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); box-shadow: none; }
+  .app-tabbar a { border-radius: 12px; }
+}
