@@ -94,3 +94,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .app-tabbar { bottom: 0; width: 100%; border-radius: 0; border-width: 1px 0 0; padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); box-shadow: none; }
   .app-tabbar a { border-radius: 12px; }
 }
+
+/* Launch video in the hero (replaces the sample-trip card) */
+.hero-video { width: min(100%, 340px); justify-self: center; border-radius: 26px; overflow: hidden; background: #000; border: 1px solid #e2e6e5; box-shadow: 0 8px 28px #19302d14; align-self: center; }
+.hero-video video { display: block; width: 100%; height: auto; }

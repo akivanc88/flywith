@@ -137,7 +137,7 @@
     // animate TO the visible state.
     var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
     tl.to(".hero .reveal", { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 })
-      .from(".trip-overview", { opacity: 0, scale: 0.98, duration: 0.5 }, "-=0.4");
+      .from(".hero-video", { opacity: 0, scale: 0.98, duration: 0.5 }, "-=0.4");
 
     // Reveal-on-scroll for everything tagged .reveal outside the hero
     if (window.ScrollTrigger) {
