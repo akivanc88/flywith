@@ -1,2 +1,4 @@
 node_modules/
 dist/
+evals/results/
+data/fares-latest.json

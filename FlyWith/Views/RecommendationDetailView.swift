@@ -40,12 +40,13 @@ struct RecommendationDetailView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(recommendation.worthItSummary)
                                     .font(.headline)
-                                Text("Scored for fare, hotel cost, stopover length, airport comfort, and family suitability.")
+                                Text("Scored for fatigue, visas, hotels and fare — for who is travelling.")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         }
                         Divider()
+                        PillarBreakdown(pillars: recommendation.rubric.pillars)
                         InsightRow(icon: "figure.and.child.holdinghands", title: "Family logistics", bodyText: city.familyLogistics)
                         InsightRow(icon: "figure.roll", title: "Accessibility", bodyText: city.accessibilityNotes)
                         InsightRow(icon: "airplane.circle", title: "Airport comfort", bodyText: city.airportComfort)
@@ -221,6 +222,37 @@ struct PriceRow: View {
                 .fontWeight(isBold ? .bold : .regular)
                 .strikethrough(style == .strikethrough, color: .secondary)
                 .foregroundStyle(style == .strikethrough ? .secondary : .primary)
+        }
+    }
+}
+
+/// Plain-language breakdown of the worth-it score: each pillar's points out of its weight.
+struct PillarBreakdown: View {
+    let pillars: WorthItRubric.Pillars
+
+    private var rows: [(String, Double, Double)] {
+        let w = WorthItRubric.weights
+        return [
+            ("Fatigue relief", pillars.fatigue, w.fatigue),
+            ("Stay length", pillars.stay, w.stay),
+            ("Fit for your party", pillars.fit, w.fit),
+            ("Fare vs direct", pillars.fare, w.fare),
+            ("Hotel cost", pillars.hotels, w.hotels),
+            ("Visa friction", pillars.visa, w.visa),
+        ]
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ForEach(rows, id: \.0) { name, value, weight in
+                HStack {
+                    Text(name).font(.caption)
+                    Spacer()
+                    Text("\(Int((value * weight).rounded())) / \(Int(weight))")
+                        .font(.caption).fontWeight(.semibold).monospacedDigit()
+                }
+                .accessibilityElement(children: .combine)
+            }
         }
     }
 }

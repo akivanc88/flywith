@@ -132,7 +132,8 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
                 guard let self, let leg1Offer, let leg2Offer else { return [nil] }
                 let comparisonPrice = directOffer?.googleFlightsPrice ?? directOffer?.price
                 return [self.buildLetsFGRecommendation(query: query, stopover: city, leg1: leg1Offer,
-                                                       leg2: leg2Offer, directComparisonPrice: comparisonPrice)]
+                                                       leg2: leg2Offer, directComparisonPrice: comparisonPrice,
+                                                       directHours: directOffer.map { Double($0.durationMinutes) / 60 })]
             }
             .receive(on: DispatchQueue.main)
             .sink(
@@ -170,7 +171,8 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
         stopover: StopoverCity,
         leg1: LetsFGAgentOffer,
         leg2: LetsFGAgentOffer,
-        directComparisonPrice: Double?
+        directComparisonPrice: Double?,
+        directHours: Double? = nil
     ) -> StopoverRecommendation {
         let badge: RecommendationBadge = switch query.criteria {
         case .withKids:      .familyPick
@@ -191,7 +193,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             totalPrice: leg1.price + leg2.price,
             directComparisonPrice: directComparisonPrice,
             badge: badge
-        )
+        ).scored(for: query, directHours: directHours)
     }
 
     func mapLeg(
@@ -248,7 +250,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             origin: origin,
             destination: destination,
             dateFrom: date,
-            adults: max(1, query.adultCount),
+            adults: max(1, query.adultCount + query.seniorCount),
             children: max(0, query.childCount),
             infants: max(0, query.infantCount),
             currency: "CAD",
@@ -428,7 +430,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             guard let self else { return }
             self.recommendations = results
                 .map { rec in
-                    self.withDirectComparison(rec, directPrice: directComparisonPrice)
+                    self.withDirectComparison(rec, directPrice: directComparisonPrice).scored(for: query)
                 }
                 .sorted {
                     $0.stopoverCity.scores.score(for: query.criteria) >
@@ -502,7 +504,7 @@ final class FlightService: ObservableObject, FlightServiceProtocol {
             .init(name: "fly_to", value: to),
             .init(name: "date_from", value: date),
             .init(name: "date_to", value: date),
-            .init(name: "adults", value: "\(query.adultCount)"),
+            .init(name: "adults", value: "\(query.adultCount + query.seniorCount)"),
             .init(name: "children", value: "\(query.childCount)"),
             .init(name: "infants", value: "\(query.infantCount)"),
             .init(name: "curr", value: "CAD"),

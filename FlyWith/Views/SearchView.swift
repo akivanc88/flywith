@@ -46,6 +46,11 @@ struct SearchView: View {
                                 Stepper("Adults: \(search.adultCount)", value: $search.adultCount, in: 1...6)
                                 Stepper("Children: \(search.childCount)", value: $search.childCount, in: 0...5)
                                 Stepper("Infants: \(search.infantCount)", value: $search.infantCount, in: 0...3)
+                                Stepper("Seniors: \(search.seniorCount)", value: $search.seniorCount, in: 0...4)
+                                    .accessibilityHint("Grandparents or travellers who need a gentler pace")
+                                Picker("Passport", selection: $search.passport) {
+                                    ForEach(["CA", "US", "GB", "AU", "IN"], id: \.self) { Text($0).tag($0) }
+                                }
                             }
                         }
 

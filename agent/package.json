@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "FlyWith stopover concierge — orchestrator + subagent architecture on the Anthropic SDK",
+  "description": "FlyWith stopover concierge — Jev intake router + code-owned subagents + verifier on the Anthropic SDK",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/server.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=95 tests/*.test.ts",
+    "record-replay": "tsx scripts/record-replay.ts",
+    "eval": "tsx evals/run.ts",
+    "eval:live": "tsx evals/run.ts --live",
+    "poll-fares": "tsx scripts/poll-fares.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0"
