@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test (coverage gate: 100% lines/functions, 95% branches)
+      - name: "Test (coverage gate: 100% lines/functions, 95% branches)"
         run: npm test
 
       - name: Offline evals (router + end-to-end scenarios)
