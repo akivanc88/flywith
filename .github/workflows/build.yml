@@ -47,14 +47,61 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
+      - name: Test (coverage gate: 100% lines/functions, 95% branches)
         run: npm test
+
+      - name: Offline evals (router + end-to-end scenarios)
+        run: npm run eval
 
       - name: Validate landing-page replay
         run: node ../scripts/validate-agent-replay.mjs
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            agent/package-lock.json
+            e2e/package-lock.json
+
+      - name: Install agent and e2e dependencies
+        run: |
+          npm ci --prefix agent
+          npm ci --prefix e2e
+
+      - name: Install Chromium
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Run desktop and mobile journeys
+        working-directory: e2e
+        env:
+          CI: "true"
+        run: npx playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 5
 
   build:
     name: Build FlyWith (Xcode)

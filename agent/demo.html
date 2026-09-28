@@ -5,32 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>FlyWith Agent — live trace demo</title>
 <style>
-  :root { --bg:#062a2c; --panel:#0b3d40; --ink:#e8f4f2; --dim:#8db8b4; --gold:#e0b45c; --teal:#2dd4bf; }
+  :root { --bg:#062a2c; --panel:#0b3d40; --ink:#e8f4f2; --dim:#8db8b4; --gold:#e0b45c; --teal:#2dd4bf; --err:#e05c5c; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
-  header { padding:20px 24px; border-bottom:1px solid #134e52; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header { padding:16px; border-bottom:1px solid #134e52; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   header h1 { font-size:16px; margin:0; font-weight:600; }
   header h1 span { color:var(--teal); }
-  input { flex:1; min-width:280px; background:var(--panel); border:1px solid #17595e; color:var(--ink); padding:10px 14px; border-radius:8px; font:inherit; }
+  input { flex:1; min-width:0; width:100%; background:var(--panel); border:1px solid #17595e; color:var(--ink); padding:10px 14px; border-radius:8px; font:inherit; }
   button { background:var(--teal); color:#04292b; border:0; padding:10px 18px; border-radius:8px; font:inherit; font-weight:700; cursor:pointer; }
   button:disabled { opacity:.5; cursor:wait; }
-  main { display:grid; grid-template-columns: 1fr 380px; gap:0; min-height:calc(100vh - 73px); }
-  #trace { padding:20px 24px; overflow-y:auto; }
-  #verdict { border-left:1px solid #134e52; padding:20px; background:#07333678; }
-  .ev { margin:0 0 10px; padding:10px 14px; border-radius:8px; background:var(--panel); border-left:3px solid var(--dim); animation: slide .25s ease; }
-  .ev.orchestrator { border-left-color: var(--teal); }
-  .ev.subagent { border-left-color: var(--gold); margin-left:24px; }
-  .ev.tool { border-left-color:#5e8d8a; margin-left:48px; font-size:13px; color:var(--dim); }
-  .ev.error { border-left-color:#e05c5c; }
+  main { display:grid; grid-template-columns: 1fr 380px; min-height:calc(100vh - 73px); }
+  #trace { padding:16px; overflow-y:auto; }
+  #verdict { border-left:1px solid #134e52; padding:16px; }
+  .ev { margin:0 0 10px; padding:10px 14px; border-radius:8px; background:var(--panel); border-left:3px solid var(--dim); overflow-wrap:anywhere; }
+  .ev.orch { border-left-color: var(--teal); }
+  .ev.sub { border-left-color: var(--gold); margin-left:16px; }
+  .ev.tool { margin-left:32px; font-size:13px; color:var(--dim); }
+  .ev.err { border-left-color: var(--err); }
   .ev .tag { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); display:block; margin-bottom:4px; }
-  .ev.subagent .tag { color: var(--gold); }
-  .ev.orchestrator .tag { color: var(--teal); }
-  @keyframes slide { from { opacity:0; transform:translateY(6px);} }
   .card { background:var(--panel); border:1px solid #17595e; border-radius:12px; padding:16px; margin-bottom:12px; }
   .card h3 { margin:0 0 6px; font-size:15px; }
   .score { float:right; background:var(--gold); color:#04292b; font-weight:800; border-radius:6px; padding:2px 8px; }
-  .badge { font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid var(--dim); color:var(--dim); }
-  .badge.verified { border-color:var(--teal); color:var(--teal); }
   .muted { color:var(--dim); font-size:13px; }
   @media (max-width: 900px){ main { grid-template-columns:1fr; } #verdict { border-left:0; border-top:1px solid #134e52; } }
 </style>
@@ -38,75 +33,69 @@
 <body>
 <header>
   <h1>Fly<span>With</span> agent trace</h1>
-  <input id="prompt" value="Toronto to Mumbai in November, 2 adults + 2 kids (ages 4 and 7) + grandma, Canadian passports. Is a stopover worth it?" />
-  <button id="go">Run agents</button>
+  <input id="prompt" aria-label="Trip request" value="Toronto to Mumbai in November, 2 adults + 2 kids (ages 4 and 7) + grandma, Canadian passports. Is a stopover worth it?" />
+  <button id="go" type="button">Run agents</button>
 </header>
 <main>
-  <div id="trace"></div>
-  <aside id="verdict"><p class="muted">The structured verdict will appear here after the verifier approves it.</p></aside>
+  <div id="trace" aria-live="polite"></div>
+  <aside id="verdict" aria-live="polite"><p class="muted">The verdict appears here only after the verifier approves it.</p></aside>
 </main>
 <script>
 const trace = document.getElementById("trace");
 const verdictPane = document.getElementById("verdict");
 const btn = document.getElementById("go");
+const LABEL = { "flight-search": "✈ flight-search", "family-logistics": "🧳 family-logistics", "stopover-value": "∑ stopover-value", "verifier": "✓ verifier" };
+const money = (n) => "$" + Number(n).toLocaleString("en-CA");
 
+function node(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function add(cls, tag, text) {
-  const div = document.createElement("div");
-  div.className = "ev " + cls;
-  div.innerHTML = '<span class="tag"></span>';
-  div.querySelector(".tag").textContent = tag;
-  div.appendChild(document.createTextNode(text));
+  const div = node("div", "ev " + cls);
+  div.append(node("span", "tag", tag), document.createTextNode(text));
   trace.appendChild(div);
   trace.scrollTop = trace.scrollHeight;
 }
 
 function renderVerdict(v) {
-  verdictPane.innerHTML = "";
-  const h = document.createElement("div");
-  h.innerHTML = "<h2 style='margin:0 0 4px;font-size:17px'>" + v.route + "</h2>" +
-    "<p class='muted'>" + v.summary + "</p>" +
-    "<p class='muted'>Direct baseline: CAD $" + v.directBaselineCAD + "</p>";
-  verdictPane.appendChild(h);
+  verdictPane.replaceChildren(node("h2", "", v.route), node("p", "muted", v.summary), node("p", "muted", "Direct baseline: " + money(v.directBaselineCAD) + " per seat"));
   for (const o of v.options) {
-    const c = document.createElement("div");
-    c.className = "card";
-    c.innerHTML =
-      "<span class='score'>" + o.worthItScore + "</span>" +
-      "<h3>" + o.stopoverCity + " · " + o.suggestedDays + " days</h3>" +
-      "<p class='muted'>All-in ~CAD $" + o.allInCAD + " (" + (o.deltaVsDirectCAD >= 0 ? "+" : "") + o.deltaVsDirectCAD + " vs direct) · flights $" + o.flightTotalCAD + " + hotel est. $" + o.hotelEstimateCAD + "</p>" +
-      "<p>✅ " + o.highlight + "</p><p>⚠️ " + o.caution + "</p>" +
-      "<p class='muted'>🛂 " + o.visaVerdict + "</p>" +
-      "<span class='badge " + o.dataStatus + "'>" + o.dataStatus + "</span>";
+    const c = node("div", "card");
+    c.append(node("span", "score", String(o.worthItScore)), node("h3", "", o.stopoverCity + " · " + o.suggestedDays + " days"),
+      node("p", "muted", money(o.flightTotalCAD) + "/seat (" + (o.deltaVsDirectCAD >= 0 ? "+" : "−") + money(Math.abs(o.deltaVsDirectCAD)) + " vs direct) · hotel est. " + money(o.hotelEstimateCAD)),
+      node("p", "", "✅ " + o.highlight), node("p", "", "⚠️ " + o.caution), node("p", "muted", "🛂 " + o.visaVerdict), node("span", "muted", o.dataStatus));
     verdictPane.appendChild(c);
   }
-  const note = document.createElement("p");
-  note.className = "muted";
-  note.textContent = "Verifier: " + v.verifierNote;
-  verdictPane.appendChild(note);
+  verdictPane.appendChild(node("p", "muted", "Verifier: " + v.verifierNote));
 }
 
-btn.addEventListener("click", () => {
-  trace.innerHTML = "";
-  verdictPane.innerHTML = "<p class='muted'>Waiting for verified verdict…</p>";
+function handle(e) {
+  switch (e.type) {
+    case "run.start": add("orch", "orchestrator", "Planning: " + e.prompt); break;
+    case "router.decision": add("orch", "🧭 intake-router", e.decision.action === "reject" ? "Request screened before any agent runs." : "Routed to " + e.decision.subagents.map((a) => LABEL[a] || a).join(" · ")); break;
+    case "orchestrator.text": add("orch", "orchestrator", e.text); break;
+    case "subagent.start": add("sub", (LABEL[e.agent] || e.agent) + " · spawned", e.task); break;
+    case "subagent.tool": add("tool", (LABEL[e.agent] || e.agent) + " → " + e.tool, JSON.stringify(e.input)); break;
+    case "subagent.tool_result": add("tool", (LABEL[e.agent] || e.agent) + " ← " + e.tool, e.summary); break;
+    case "subagent.done": add("sub", (LABEL[e.agent] || e.agent) + " · report", e.report); break;
+    case "verdict": renderVerdict(e.verdict); add("orch", "verdict", "Published ✔"); break;
+    case "run.error": add("err", "error", e.message); break;
+  }
+}
+
+btn.addEventListener("click", async () => {
+  trace.replaceChildren();
+  verdictPane.replaceChildren(node("p", "muted", "Waiting for a verified verdict…"));
   btn.disabled = true;
-  const prompt = document.getElementById("prompt").value;
-  const es = new EventSource("/api/plan?prompt=" + encodeURIComponent(prompt));
-  es.onmessage = (msg) => {
-    const e = JSON.parse(msg.data);
-    switch (e.type) {
-      case "run.start": add("orchestrator", "orchestrator", "Planning: " + e.prompt); break;
-      case "orchestrator.thinking": add("orchestrator", "orchestrator · thinking", e.text); break;
-      case "orchestrator.text": add("orchestrator", "orchestrator", e.text); break;
-      case "subagent.start": add("subagent", e.agent + " · start", e.task); break;
-      case "subagent.tool": add("tool", e.agent + " → " + e.tool, JSON.stringify(e.input)); break;
-      case "subagent.tool_result": add("tool", e.agent + " ← " + e.tool, e.summary); break;
-      case "subagent.done": add("subagent", e.agent + " · report", e.report); break;
-      case "verdict": renderVerdict(e.verdict); add("orchestrator", "verdict", "Published ✔"); break;
-      case "run.error": add("error", "error", e.message); break;
-      case "run.done": es.close(); btn.disabled = false; break;
-    }
-  };
-  es.onerror = () => { es.close(); btn.disabled = false; };
+  try {
+    const res = await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: document.getElementById("prompt").value }) });
+    const run = await res.json();
+    if (!res.ok) throw new Error(run.error || "Request failed.");
+    const es = new EventSource(run.eventsUrl);
+    es.onmessage = (msg) => { const { event } = JSON.parse(msg.data); handle(event); if (event.type === "run.done") { es.close(); btn.disabled = false; } };
+    es.onerror = () => { es.close(); btn.disabled = false; };
+  } catch (error) {
+    add("err", "error", error.message);
+    btn.disabled = false;
+  }
 });
 </script>
 </body>

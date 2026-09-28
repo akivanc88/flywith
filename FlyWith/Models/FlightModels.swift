@@ -56,12 +56,15 @@ struct FlightSearch {
     var adultCount: Int = 2
     var childCount: Int = 0
     var infantCount: Int = 0
+    var seniorCount: Int = 0
+    var passport: String = "CA"
     var criteria: TravelerCriteria = .withKids
     var minStopoverDays: Int = 3
     var maxStopoverDays: Int = 7
     var resultLimit: Int = 20
 
-    var totalPassengers: Int { adultCount + childCount + infantCount }
+    var totalPassengers: Int { adultCount + childCount + infantCount + seniorCount }
+    var party: WorthItRubric.Party { .init(adults: adultCount, children: childCount, infants: infantCount, seniors: seniorCount) }
 }
 
 // MARK: - Stopover City
@@ -160,31 +163,46 @@ struct StopoverRecommendation: Identifiable {
     /// than fabricate a baseline from the stopover total.
     let directComparisonPrice: Double?
     let badge: RecommendationBadge
+    /// Who is travelling and how they search; drives the profile-aware rubric.
+    var party = WorthItRubric.Party(adults: 2, children: 0, infants: 0, seniors: 0)
+    var criteria: TravelerCriteria = .withKids
+    var passport: String = "CA"
+    /// Door-to-door hours of the direct baseline itinerary, when known.
+    var directHours: Double? = nil
 
     var savings: Double? { directComparisonPrice.map { $0 - totalPrice } }
     var hasSavings: Bool { (savings ?? 0) > 0 }
     var costPerStopoverDay: Double { totalPrice / Double(stopoverDays) }
 
+    var rooms: Int { WorthItRubric.rooms(for: party) }
+
+    /// Hotel estimate for the whole party: nightly rate × nights × rooms.
     var estimatedHotelTotal: Double {
-        Double(stopoverCity.estimatedHotelPerNight * max(stopoverDays - 1, 1))
+        Double(stopoverCity.estimatedHotelPerNight * WorthItRubric.nights(forDays: stopoverDays) * rooms)
     }
 
     var estimatedTripTotal: Double {
         totalPrice + estimatedHotelTotal
     }
 
-    var comfortScore: Double {
-        let city = stopoverCity
-        return (city.scores.family * 0.35) + (city.scores.seniors * 0.25) + (city.scores.overall * 0.25) + (city.scores.budget * 0.15)
+    var rubric: WorthItRubric.Result {
+        WorthItRubric.score(WorthItRubric.Input(
+            directFarePerSeat: directComparisonPrice,
+            stopoverFarePerSeat: totalPrice,
+            directHours: directHours,
+            legs: [leg1, leg2].map { WorthItRubric.Leg(hours: Double($0.durationMinutes) / 60, stops: $0.stops.count) },
+            days: stopoverDays,
+            hotelNightly: Double(stopoverCity.estimatedHotelPerNight),
+            rooms: rooms,
+            party: party,
+            visaFeePerPerson: stopoverCity.visaFreeCountries.contains(passport) ? 0 : nil,
+            ratings: stopoverCity.scores,
+            profiles: WorthItRubric.profiles(for: party, criteria: criteria)
+        ))
     }
 
-    var worthItScore: Int {
-        // Without a real baseline the fare axis is unknown: score it neutral (15/30).
-        let fareComponent = directComparisonPrice.map { max(0, min(30, ($0 - totalPrice + 300) / 20)) } ?? 15
-        let comfortComponent = comfortScore * 10
-        let stopoverComponent = min(Double(stopoverDays), 7) * 2
-        return Int(min(100, max(0, fareComponent + comfortComponent + stopoverComponent)))
-    }
+    /// Worth-it rubric v2: fatigue, visas, hotels and fare for whoever is travelling (see WorthItRubric).
+    var worthItScore: Int { rubric.score }
 
     var worthItSummary: String {
         if worthItScore >= 80 {
@@ -196,6 +214,90 @@ struct StopoverRecommendation: Identifiable {
         } else {
             return "Comfort upgrade"
         }
+    }
+}
+
+// MARK: - Worth-it rubric v2
+// Shared with the agent backend (agent/src/rubric.ts): six pillars normalised to 0...1,
+// weighted fare 15 · fatigue 25 · visa 5 · hotels 10 · fit 20 · stay 25. Calibrated so the
+// launch video's demo screens hold (Dubai 59%, Singapore 55% for a Diaspora Family).
+
+enum WorthItRubric {
+    struct Party: Equatable { var adults: Int; var children: Int; var infants: Int; var seniors: Int }
+    struct Leg: Equatable { var hours: Double; var stops: Int }
+    enum Profile: Equatable { case kids, seniors, budget, explorer }
+
+    struct Input {
+        var directFarePerSeat: Double?
+        var stopoverFarePerSeat: Double
+        var directHours: Double?
+        var legs: [Leg]
+        var days: Int
+        var hotelNightly: Double
+        var rooms: Int
+        var party: Party
+        /// 0 = visa-free, nil = visa arranged in advance or unknown for this passport.
+        var visaFeePerPerson: Double?
+        var ratings: StopoverScores
+        var profiles: [Profile]
+    }
+
+    struct Pillars: Equatable { var fare, fatigue, visa, hotels, fit, stay: Double }
+    struct Result: Equatable { var score: Int; var pillars: Pillars }
+
+    static let weights = Pillars(fare: 15, fatigue: 25, visa: 5, hotels: 10, fit: 20, stay: 25)
+    static let farePremiumCap = 0.6, fatigueReliefCap = 0.4, connectionPenalty = 0.5
+    static let visaFeeCap = 200.0, hotelPerTravellerNightCap = 100.0, stayDaysCap = 5.0
+
+    static func payingTravellers(_ p: Party) -> Int { p.adults + p.children + p.seniors }
+
+    /// Four people per room, at most two adults (seniors count as adults); infants share a cot.
+    static func rooms(for p: Party) -> Int {
+        let people = payingTravellers(p)
+        return max(1, Int((Double(people) / 4).rounded(.up)), Int((Double(p.adults + p.seniors) / 2).rounded(.up)))
+    }
+
+    static func nights(forDays days: Int) -> Int { max(1, days - 1) }
+
+    static func profiles(for p: Party, criteria: TravelerCriteria) -> [Profile] {
+        var out: [Profile] = []
+        if p.children + p.infants > 0 { out.append(.kids) }
+        if p.seniors > 0 { out.append(.seniors) }
+        let stated: Profile = switch criteria {
+        case .withKids: .kids
+        case .withSeniors: .seniors
+        case .budgetFocused: .budget
+        case .explorer: .explorer
+        }
+        if !out.contains(stated) { out.append(stated) }
+        return out
+    }
+
+    static func fitRating(_ r: StopoverScores, _ profiles: [Profile]) -> Double {
+        guard !profiles.isEmpty else { return r.overall }
+        let total = profiles.reduce(0.0) { sum, p in
+            sum + (p == .kids ? r.family : p == .seniors ? r.seniors : p == .budget ? r.budget : r.explorer)
+        }
+        return total / Double(profiles.count)
+    }
+
+    private static func clamp(_ x: Double) -> Double { max(0, min(1, x)) }
+
+    static func score(_ i: Input) -> Result {
+        let travellers = Double(max(1, payingTravellers(i.party)))
+        // Unknown baselines score neutral rather than implying savings or relief.
+        let fare = i.directFarePerSeat.map { $0 > 0 ? 1 - clamp((i.stopoverFarePerSeat - $0) / $0 / farePremiumCap) : 0.5 } ?? 0.5
+        let longest = i.legs.map(\.hours).max() ?? 0
+        let connections = Double(i.legs.reduce(0) { $0 + $1.stops })
+        let fatigue = i.directHours.map { $0 > 0 ? clamp(clamp(($0 - longest) / $0) / fatigueReliefCap - connectionPenalty * connections) : 0.5 } ?? 0.5
+        let visa = i.visaFeePerPerson.map { 1 - clamp($0 / visaFeeCap) } ?? 0
+        let hotels = 1 - clamp(i.hotelNightly * Double(i.rooms) / travellers / hotelPerTravellerNightCap)
+        let fit = clamp(fitRating(i.ratings, i.profiles) / 5)
+        let stay = clamp(Double(i.days) / stayDaysCap)
+        let p = Pillars(fare: fare, fatigue: fatigue, visa: visa, hotels: hotels, fit: fit, stay: stay)
+        let w = weights
+        let raw = w.fare * p.fare + w.fatigue * p.fatigue + w.visa * p.visa + w.hotels * p.hotels + w.fit * p.fit + w.stay * p.stay
+        return Result(score: Int(raw.rounded()), pillars: p)
     }
 }
 
@@ -293,4 +395,16 @@ extension StopoverCity {
             researchGap: "Explore-style tools can surface cheap places, but they do not screen out logistics that matter for families."
         ),
     ]
+}
+
+extension StopoverRecommendation {
+    /// Copy carrying the search's party, profile and passport so the rubric scores for who is travelling.
+    func scored(for query: FlightSearch, directHours: Double? = nil) -> StopoverRecommendation {
+        var copy = self
+        copy.party = query.party
+        copy.criteria = query.criteria
+        copy.passport = query.passport
+        copy.directHours = directHours ?? self.directHours
+        return copy
+    }
 }

@@ -2,14 +2,17 @@ import http, { type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { runOrchestrator, type ModelClient } from "./orchestrator.js";
+import { runOrchestrator } from "./orchestrator.js";
+import type { ModelClient } from "./model.js";
+import type { JevClient } from "./jev.js";
+import { loadSnapshot, type FareSnapshot } from "./fares.js";
 import type { PlanRequest, RunResult, SequencedTraceEvent, TraceEvent } from "./trace.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const MAX_BODY = 16 * 1024;
 
 interface RunState { id: string; events: SequencedTraceEvent[]; listeners: Set<(event: SequencedTraceEvent) => void>; controller: AbortController; complete: boolean; result?: RunResult }
-export interface ServerOptions { model?: ModelClient; allowedOrigins?: string[]; timeoutMs?: number }
+export interface ServerOptions { model?: ModelClient; jev?: JevClient; allowedOrigins?: string[]; timeoutMs?: number; heartbeatMs?: number; retentionMs?: number; fares?: FareSnapshot }
 
 function json(res: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void { res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers }); res.end(JSON.stringify(body)); }
 function cors(req: IncomingMessage, allowed: string[]): Record<string, string> { const origin = req.headers.origin; return origin && allowed.includes(origin) ? { "Access-Control-Allow-Origin": origin, Vary: "Origin" } : {}; }
@@ -33,7 +36,7 @@ export function createAgentServer(options: ServerOptions = {}): http.Server {
         const body = await readJson(req) as PlanRequest;
         const id = crypto.randomUUID(); const state: RunState = { id, events: [], listeners: new Set(), controller: new AbortController(), complete: false }; runs.set(id, state);
         const emit = (event: TraceEvent) => { const item = { sequence: state.events.length + 1, event }; state.events.push(item); for (const listener of state.listeners) listener(item); };
-        setImmediate(async () => { state.result = await runOrchestrator(body, emit, { model: options.model, signal: state.controller.signal, timeoutMs: options.timeoutMs, runId: id }); state.complete = true; setTimeout(() => runs.delete(id), 5 * 60_000).unref(); });
+        setImmediate(async () => { state.result = await runOrchestrator(body, emit, { model: options.model, jev: options.jev, fares: options.fares, signal: state.controller.signal, timeoutMs: options.timeoutMs, runId: id }); state.complete = true; setTimeout(() => runs.delete(id), options.retentionMs ?? 5 * 60_000).unref(); });
         return json(res, 202, { runId: id, eventsUrl: `/api/plan/${id}/events` }, headers);
       } catch (error) { const status = typeof error === "object" && error && "status" in error ? Number(error.status) : 400; return json(res, status, { error: error instanceof Error ? error.message : "Invalid request." }, headers); }
     }
@@ -54,7 +57,7 @@ export function createAgentServer(options: ServerOptions = {}): http.Server {
       const after = Number(req.headers["last-event-id"] ?? 0); state.events.filter((x) => x.sequence > after).forEach(send);
       if (ended) return;
       if (state.complete) return res.end();
-      state.listeners.add(send); heartbeat = setInterval(() => { if (!res.destroyed && !res.writableEnded) res.write(": heartbeat\n\n"); }, 15_000);
+      state.listeners.add(send); heartbeat = setInterval(() => { if (!res.destroyed && !res.writableEnded) res.write(": heartbeat\n\n"); }, options.heartbeatMs ?? 15_000);
       req.on("close", () => { if (ended) return; ended = true; cleanup(); if (!state.complete && state.listeners.size === 0) state.controller.abort(new Error("Client disconnected.")); });
       return;
     }
@@ -62,7 +65,20 @@ export function createAgentServer(options: ServerOptions = {}): http.Server {
   });
 }
 
+/** Start the server. Without API keys it runs fully offline: heuristic intake and the template drafter. */
+export function startServer(env: NodeJS.ProcessEnv = process.env, log: (line: string) => void = console.log): http.Server {
+  const port = Number(env.PORT ?? 8787);
+  const fares = loadSnapshot(env);
+  const server = createAgentServer({ fares });
+  server.listen(port, () => {
+    log(`FlyWith agent server: http://localhost:${port}`);
+    log(`fares: ${fares.source} (observed ${fares.observedAt.slice(0, 10)})`);
+    log(`intake: ${env.TYPESAFE_API_KEY ? "live classifier" : "offline classifier"} · drafting: ${env.ANTHROPIC_API_KEY ? "live model" : "offline template"}`);
+  });
+  return server;
+}
+
+/* c8 ignore next 3 */
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  if (!process.env.ANTHROPIC_API_KEY) { console.error("ANTHROPIC_API_KEY is not set."); process.exit(1); }
-  const port = Number(process.env.PORT ?? 8787); createAgentServer().listen(port, () => console.log(`FlyWith agent server: http://localhost:${port}`));
+  startServer();
 }

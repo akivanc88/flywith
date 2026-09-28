@@ -72,6 +72,15 @@ opaque `eventsUrl` returned by that request. The browser does not display model
 reasoning. Trace evidence uses four provenance states: `live`, `snapshot`,
 `estimated`, and `editorial`; a snapshot must never be presented as live data.
 
+## Testing
+
+| Layer | Command | What it proves |
+|---|---|---|
+| Agent unit tests | `cd agent && npm test` | 100% line/function coverage gate; the launch video's verdict is a golden test |
+| Evals | `cd agent && npm run eval` | Intake routing precision/recall and 12 end-to-end scenarios |
+| Web E2E | `cd e2e && npm ci && npx playwright test` | Replay + live agent journeys on desktop and mobile |
+| iOS | Xcode / CI `xcodebuild test` | Worth-it rubric v2, including the video's demo screens (Dubai 59%, Singapore 55%) |
+
 ## Project structure
 
 ```

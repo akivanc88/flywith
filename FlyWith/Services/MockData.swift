@@ -6,6 +6,9 @@ import Foundation
 
 extension FlightService {
 
+    /// Door-to-door hours of the demo direct baseline (YYZ → CDG → BOM, CAD 1072).
+    static let mockDirectHours = 19.5
+
     func loadMockRecommendations(for query: FlightSearch) {
         let leg1Date = query.departureDate
         let leg2Date = Calendar.current.date(byAdding: .day, value: query.minStopoverDays, to: leg1Date) ?? leg1Date
@@ -13,7 +16,7 @@ extension FlightService {
         recommendations = StopoverCity.sampleCities
             .sorted { $0.scores.score(for: query.criteria) > $1.scores.score(for: query.criteria) }
             .prefix(4)
-            .map { city in mockRecommendation(city: city, query: query, leg1Date: leg1Date, leg2Date: leg2Date) }
+            .map { city in mockRecommendation(city: city, query: query, leg1Date: leg1Date, leg2Date: leg2Date).scored(for: query, directHours: Self.mockDirectHours) }
     }
 
     private func mockRecommendation(
